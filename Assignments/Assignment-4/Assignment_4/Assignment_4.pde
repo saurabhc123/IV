@@ -8,13 +8,14 @@ float plotX2, plotY2;
 int yearMin, yearMax;
 int[] years;
 float _min, _max = 0;
-int _numberOfBins = 200;
+int _numberOfBins = 100;
 int[] bins;
 float barWidth = 5;
 float labelX, labelY;
 int _minBinValue = 100000;
 int _maxBinValue=0;
 double _sigma = 5.0;
+float[] _distributionValues;
 
 void setup() 
 {  
@@ -37,6 +38,11 @@ void setup()
     kde_plotY1 = 60;  
     kde_plotY2 = height - 70; 
     
+    //float[] inputValues = new float[]{45.0, 20.0, 75.5, 95.9, 95.8};
+    float[] inputValues = inputTable.getFloatList(0).values();
+    _distributionValues = generateKDEDistribution(inputValues);
+    println("Finished proceessing KDE distribution");
+    
     noLoop();
 }
 
@@ -51,11 +57,7 @@ void draw()
 
 void drawDensityCurve()
 {
-    //float[] inputValues = new float[]{45.0, 20.0, 75.5, 95.9, 95.8};
-    float[] inputValues = inputTable.getFloatList(0).values();
-    float[] distributionValues = generateKDEDistribution(inputValues);
-    println("Finished proceessing KDE distribution");
-    drawKDEDistribution(distributionValues);
+    drawKDEDistribution(_distributionValues);
 }
 
 float[] generateKDEDistribution(float[] inputValues)
@@ -64,6 +66,7 @@ float[] generateKDEDistribution(float[] inputValues)
     for(int i =0;i<inputValues.length;i++)
     {
         result[i] = generateKDEValueForSample(inputValues[i], inputValues);
+        println("Done iterating over i ->" + i + " KDE Value:" + result[i]);
     }
 
     return result;
@@ -135,7 +138,7 @@ int[] loadDataInBins(Table tableParam)
     Iterator<Float> iterator = tableParam.getFloatList(0).iterator();
     for (int i =0; i< _numberOfBins; i++)
     {
-        print("Iterating over i ->" + i);
+        //print("Iterating over i ->" + i);
         while (iterator.hasNext())
         {
             float iteratorValue = iterator.next();
@@ -150,7 +153,7 @@ int[] loadDataInBins(Table tableParam)
                 break;
             }
         }
-        println("Done iterating over i ->" + i + " ItemCount:" + binValues[i]);
+        //println("Done iterating over i ->" + i + " ItemCount:" + binValues[i]);
         if (binValues[i] < _minBinValue)
             _minBinValue = binValues[i];
         if (binValues[i] > _maxBinValue)
