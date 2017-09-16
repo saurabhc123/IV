@@ -8,7 +8,7 @@ float plotX2, plotY2;
 int yearMin, yearMax;
 int[] years;
 float _min, _max = 0;
-int _numberOfBins = 1000;
+int _numberOfBins = 200;
 int[] bins;
 float barWidth = 5;
 float labelX, labelY;
@@ -51,8 +51,9 @@ void draw()
 
 void drawDensityCurve()
 {
-    float[] inputValues = new float[]{45.0, 20.0, 75.5, 95.9, 95.8};
-    float[] distributionValues = generateKDEDistribution(inputTable.getFloatList(0).values());
+    //float[] inputValues = new float[]{45.0, 20.0, 75.5, 95.9, 95.8};
+    float[] inputValues = inputTable.getFloatList(0).values();
+    float[] distributionValues = generateKDEDistribution(inputValues);
     println("Finished proceessing KDE distribution");
     drawKDEDistribution(distributionValues);
 }
@@ -88,8 +89,9 @@ public static double getGaussian(float x, double sigma)
 
 void drawKDEDistribution(float[] inputValues)
 {
-    //fill(0, 0, 255);
-    noFill();
+    fill(0, 0, 255);
+    //noFill();
+    strokeWeight(2);
     beginShape(  );  
     int rowCount = inputValues.length;  
     for (int row = 0; row < rowCount; row++) 
@@ -108,9 +110,10 @@ void drawKDEDistribution(float[] inputValues)
 
 
 void drawDataBars() {  
-    //noStroke(  );
+    noStroke(  );
     fill(0, 0, 255);
     rectMode(CORNERS);  
+    barWidth = (plotX2 - plotX1)/_numberOfBins;
     for (int row = 0; row < _numberOfBins; row++) 
     {    
         float value = bins[row];      
