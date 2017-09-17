@@ -1,4 +1,4 @@
-import java.util.Iterator; //<>// //<>//
+import java.util.Iterator; //<>// //<>// //<>//
 
 
 
@@ -14,8 +14,12 @@ float barWidth = 5;
 float labelX, labelY;
 int _minBinValue = 100000;
 int _maxBinValue=0;
-double _sigma = 5.0;
+double _sigma = 24.0;
 float[] _distributionValues;
+float _minKde = 10000.0;
+float _maxKde = 0.0;
+float _sumKde = 0.0;
+float _sampleSize = 0.0;
 
 void setup() 
 {  
@@ -35,14 +39,16 @@ void setup()
     plotY1 = 60;  
     plotY2 = height/2 - 70;  
     labelY = height/2 - 25;
-    kde_plotY1 = 60;  
+    kde_plotY1 = height/2 + 60;  
     kde_plotY2 = height - 70; 
-    
-    //float[] inputValues = new float[]{45.0, 20.0, 75.5, 95.9, 95.8};
+
+    //float[] inputValues = new float[]{4.0, 20.0, 75.5, 95.9, 95.8,342.0,23.0,46.0,900.0,12.0,13.0,10.0};
     float[] inputValues = inputTable.getFloatList(0).values();
+    _sampleSize = inputValues.length;        
     _distributionValues = generateKDEDistribution(inputValues);
-    println("Finished proceessing KDE distribution");
-    
+    println("Finished proceessing KDE distribution. Min KDE:"+_minKde+ " Max KDE:"+_maxKde);
+    //processKDEDataForThemeRiver();
+
     noLoop();
 }
 
@@ -52,8 +58,38 @@ void draw()
     //rectMode(CORNERS); 
     //rect(10,50,100,5);
     drawDataBars();
-    drawDensityCurve();
+    drawExp();
+    //drawDensityCurve();
 }
+
+void drawExp()
+{
+    //background(224);
+    fill(0,0,255);
+    stroke(#5679C1);
+    //noFill(  );
+    strokeWeight(0.5);
+    beginShape(  );  
+    int rowCount = _distributionValues.length;
+    //float themeRiverYCorrection = -_sumKde/(_sampleSize + 1);
+    for (int row = 0; row < rowCount; row++) 
+    {    
+        float value = _distributionValues[row];      
+        float x = map(row, 0, rowCount, plotX1, plotX2);      
+        //float y = map(value, 0, 100.0, kde_plotY2, kde_plotY1);
+        float y = map(value, _minKde, _maxKde, kde_plotY2, kde_plotY1);
+        //float y = map(value, _min, _max, plotY2, plotY1);
+        curveVertex(x, y);
+        if ((row == 0) || (row == rowCount-1)) 
+        {
+            curveVertex(x, y);
+        }
+    }  
+    vertex(plotX2, kde_plotY2);  
+    vertex(plotX1, kde_plotY2);  
+    endShape(CLOSE);
+}
+
 
 void drawDensityCurve()
 {
@@ -63,9 +99,10 @@ void drawDensityCurve()
 float[] generateKDEDistribution(float[] inputValues)
 {
     float[] result = new float[inputValues.length];
-    for(int i =0;i<inputValues.length;i++)
+    for (int i =0; i<inputValues.length; i++)
     {
         result[i] = generateKDEValueForSample(inputValues[i], inputValues);
+        _sumKde =+ result[i];
         println("Done iterating over i ->" + i + " KDE Value:" + result[i]);
     }
 
@@ -82,6 +119,11 @@ float generateKDEValueForSample(float x, float[] inputValues)
         result += getGaussian(x-val, _sigma);
     }
 
+    if (result > _maxKde)
+        _maxKde = result;
+    if (result < _minKde)
+        _minKde = result;
+
     return result;
 }
 
@@ -92,25 +134,23 @@ public static double getGaussian(float x, double sigma)
 
 void drawKDEDistribution(float[] inputValues)
 {
-    fill(0, 0, 255);
+    //fill(0, 0, 255);
     //noFill();
     strokeWeight(2);
     beginShape(  );  
-    int rowCount = inputValues.length;  
+    int rowCount = inputValues.length;
+    float themeRiverYCorrection = -_sumKde/(_sampleSize + 1);
     for (int row = 0; row < rowCount; row++) 
     {    
         float value = inputValues[row];      
         float x = map(row, 0, rowCount, plotX1, plotX2);      
-        float y = map(value, 0.0, 800.0, kde_plotY2, kde_plotY1);
+        float y = map(value, 0, 80.0, kde_plotY2, kde_plotY1);
+        //float y = map(value, _minKde, _maxKde, kde_plotY2, kde_plotY1);
         //float y = map(value, _min, _max, plotY2, plotY1);
-        vertex(x, y); //<>//
+        vertex(x, y);
     }  
     endShape(  );
 }
-
-
-
-
 
 void drawDataBars() {  
     noStroke(  );
