@@ -14,7 +14,7 @@ float barWidth = 5;
 float labelX, labelY;
 int _minBinValue = 100000;
 int _maxBinValue=0;
-double _sigma = 24.0;
+double _sigma = 1.0;
 float[] _distributionValues;
 float _minKde = 10000.0;
 float _maxKde = 0.0;
@@ -42,11 +42,11 @@ void setup()
     kde_plotY1 = height/2 + 60;  
     kde_plotY2 = height - 70; 
 
-    //float[] inputValues = new float[]{4.0, 20.0, 75.5, 95.9, 95.8,342.0,23.0,46.0,900.0,12.0,13.0,10.0};
+    //float[] inputValues = new float[]{44.0, 20.0, 75.5, 95.9, 95.8,42.0,30.0,12.0,13.0,10.0};
     float[] inputValues = inputTable.getFloatList(0).values();
     _sampleSize = inputValues.length;        
     _distributionValues = generateKDEDistribution(inputValues);
-    println("Finished proceessing KDE distribution. Min KDE:"+_minKde+ " Max KDE:"+_maxKde);
+    println("Finished proceessing KDE distribution. Min KDE:"+_minKde+ " Max KDE:"+_maxKde); //<>//
     //processKDEDataForThemeRiver();
 
     noLoop();
@@ -77,17 +77,16 @@ void drawExp()
         float value = _distributionValues[row];      
         float x = map(row, 0, rowCount, plotX1, plotX2);      
         //float y = map(value, 0, 100.0, kde_plotY2, kde_plotY1);
-        float y = map(value, _minKde, _maxKde, kde_plotY2, kde_plotY1);
+        float y = map(value,_minKde, _maxKde, kde_plotY2, kde_plotY1);
         //float y = map(value, _min, _max, plotY2, plotY1);
         curveVertex(x, y);
-        if ((row == 0) || (row == rowCount-1)) 
-        {
-            curveVertex(x, y);
-        }
+        smooth();
+        println("x:"+x+"   y:"+y);
     }  
     vertex(plotX2, kde_plotY2);  
     vertex(plotX1, kde_plotY2);  
     endShape(CLOSE);
+    //endShape();
 }
 
 
@@ -129,7 +128,7 @@ float generateKDEValueForSample(float x, float[] inputValues)
 
 public static double getGaussian(float x, double sigma) 
 {
-    return Math.exp(-x*x / (2*sigma)) / (Math.sqrt(2 * Math.PI)*sigma);
+    return Math.exp(-(x*x) / (2*sigma)) / (Math.sqrt(2 * Math.PI)*sigma);
 }
 
 void drawKDEDistribution(float[] inputValues)
