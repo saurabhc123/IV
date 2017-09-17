@@ -14,7 +14,7 @@ float barWidth = 5;
 float labelX, labelY;
 int _minBinValue = 100000;
 int _maxBinValue=0;
-double _sigma = 1.0;
+double _sigma = 10.0;
 float[] _distributionValues;
 float _minKde = 10000.0;
 float _maxKde = 0.0;
@@ -70,7 +70,7 @@ void drawExp()
     fill(0,0,255);
     stroke(#5679C1);
     //noFill(  );
-    strokeWeight(0.5);
+    strokeWeight(0.2);
     beginShape(  );  
     int rowCount = _distributionValues.length;
     float themeRiverYCorrection = -_sumKde/(_sampleSize + 1);
@@ -79,7 +79,7 @@ void drawExp()
         float value = _distributionValues[row];      
         float x = map(row, 0, rowCount, plotX1, plotX2);      
         //float y = map(value, 0, 100.0, kde_plotY2, kde_plotY1);
-        float y = map(value,_minKde, _maxKde, kde_plotY2  + kde_plotY2*themeRiverYCorrection, kde_plotY1);
+        float y = map(value,_minKde, _maxKde + themeRiverYCorrection, kde_plotY2, kde_plotY1);
         //float y = map(value, _min, _max, plotY2, plotY1);
         curveVertex(x, y);
         smooth();
@@ -106,7 +106,7 @@ void drawThemeRiver()
         float value = _distributionValues[row];      
         float x = map(row, 0, rowCount, plotX1, plotX2);      
         //float y = map(value, 0, 100.0, kde_plotY2, kde_plotY1);
-        float y = map(value,_minKde, _maxKde, kde_plotY2, kde_plotY3);
+        float y = map(value,_minKde, _maxKde + themeRiverYCorrection, kde_plotY2, kde_plotY3);
         //float y = map(value, _min, _max, plotY2, plotY1);
         curveVertex(x, y);
         smooth();
