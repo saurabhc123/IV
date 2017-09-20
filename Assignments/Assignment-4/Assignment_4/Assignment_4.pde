@@ -20,13 +20,13 @@ float _minKde = 10000.0;
 float _maxKde = 0.0;
 float _sumKde = 0.0;
 float _sampleSize = 0.0;
-float multiplier = (float)(Math.exp(-1 / (2*_sigma*_sigma)) / (Math.sqrt(2 * Math.PI)*_sigma));
+float multiplier = 1.0;//(float)(Math.exp(-1 / (2*_sigma*_sigma)) / (Math.sqrt(2 * Math.PI)*_sigma));
 
 void setup() 
 {  
     size(720, 800);  
     inputTable = loadTable("events-10K.csv");
-    println(inputTable.getRowCount());  
+    println(inputTable.getRowCount());
     _min = inputTable.getFloatList(0).min();
     _max = inputTable.getFloatList(0).max();
     smooth();
@@ -52,12 +52,12 @@ void setup()
     line(plotX1 - 5,kde_plotY1, plotX1-5,kde_plotY3);
     line(plotX1 - 5,kde_plotY3, plotX2 ,kde_plotY3);
     //float[] inputValues = new float[]{44.0, 20.0, 75.5, 95.9, 95.8,42.0,30.0,12.0,13.0,10.0};
-    float[] inputValues = inputTable.getFloatList(0).values();
+    float[] inputValues = inputTable.getFloatList(0).getSubset(0).values();
     _sampleSize = inputValues.length;        
     _distributionValues = generateKDEDistribution(inputValues);
     //_distributionValues = readKDEDataFromFile();
     //writeKDEDataToFile();
-    println("Finished proceessing KDE distribution. Min KDE:"+_minKde+ " Max KDE:"+_maxKde); //<>//
+    println("Finished proceessing KDE distribution. Min KDE:"+_minKde+ " Max KDE:"+_maxKde);
     //processKDEDataForThemeRiver();
 
     noLoop();
@@ -79,8 +79,8 @@ void writeKDEDataToFile()
 float[] readKDEDataFromFile()
 {
     Table t = loadTable("kdeValues.csv","header");
-    _maxKde = t.getFloatList(0).max();
-    _minKde = t.getFloatList(0).min();
+    _maxKde = t.getFloatList(0).max()*multiplier;
+    _minKde = t.getFloatList(0).min()*multiplier;
     return t.getFloatList(0).values();
 }
 
@@ -107,9 +107,9 @@ void drawExp()
         float value = _distributionValues[row];      
         float x = map(row, 0, rowCount, plotX1, plotX2);      
         //float y = map(value, 0, 100.0, kde_plotY2, kde_plotY1);
-        float y = map(value,_minKde, _maxKde + themeRiverYCorrection, kde_plotY2, kde_plotY1);
+        float y = map(value*multiplier,_minKde, _maxKde + themeRiverYCorrection, kde_plotY2, kde_plotY1);
         //float y = map(value, _min, _max, plotY2, plotY1);
-        curveVertex(x, y);
+        curveVertex(x, y); //<>//
         smooth();
         println("x:"+x+"   y:"+y);
     }  
@@ -134,7 +134,7 @@ void drawThemeRiver()
         float value = _distributionValues[row];      
         float x = map(row, 0, rowCount, plotX1, plotX2);      
         //float y = map(value, 0, 100.0, kde_plotY2, kde_plotY1);
-        float y = map(value,_minKde, _maxKde + themeRiverYCorrection, kde_plotY2, kde_plotY3);
+        float y = map(value*multiplier,_minKde, _maxKde + themeRiverYCorrection, kde_plotY2, kde_plotY3);
         //float y = map(value, _min, _max, plotY2, plotY1);
         curveVertex(x, y);
         smooth();
@@ -185,12 +185,12 @@ float generateKDEValueForSample(float x, float[] inputValues)
     return result;
 }
 
-public static double getGaussian1(float x, double sigma) 
+public static double getGaussian(float x, double sigma) 
 {
     return Math.exp(-(x*x) / (2*sigma*sigma)) / (Math.sqrt(2 * Math.PI)*sigma);
 }
 
-public static double getGaussian(float x, double sigma) 
+public static double getGaussian1(float x, double sigma) 
 {
     return Math.exp(-(x*x));
 }
