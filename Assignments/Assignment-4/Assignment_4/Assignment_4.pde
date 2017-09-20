@@ -14,12 +14,13 @@ float barWidth = 5;
 float labelX, labelY;
 int _minBinValue = 100000;
 int _maxBinValue=0;
-double _sigma = 10.0;
+double _sigma = 5.0;
 float[] _distributionValues;
 float _minKde = 10000.0;
 float _maxKde = 0.0;
 float _sumKde = 0.0;
 float _sampleSize = 0.0;
+float multiplier = (float)(Math.exp(-1 / (2*_sigma*_sigma)) / (Math.sqrt(2 * Math.PI)*_sigma));
 
 void setup() 
 {  
@@ -42,22 +43,49 @@ void setup()
     kde_plotY1 = height/2 + 20;
     kde_plotY2 = kde_plotY1 + 200; 
     kde_plotY3 = height - 20; 
-
+    textSize(20);
+    textAlign(LEFT);
+    text("Histogram", plotX1,plotY1 + 10);
+    text("KDE Curve", plotX1, kde_plotY1 + 10);
+    line(plotX1 - 5,plotY1, plotX1-5,plotY2);
+    line(plotX1 - 5,plotY2, plotX2 ,plotY2);
+    line(plotX1 - 5,kde_plotY1, plotX1-5,kde_plotY3);
+    line(plotX1 - 5,kde_plotY3, plotX2 ,kde_plotY3);
     //float[] inputValues = new float[]{44.0, 20.0, 75.5, 95.9, 95.8,42.0,30.0,12.0,13.0,10.0};
     float[] inputValues = inputTable.getFloatList(0).values();
     _sampleSize = inputValues.length;        
     _distributionValues = generateKDEDistribution(inputValues);
+    //_distributionValues = readKDEDataFromFile();
+    //writeKDEDataToFile();
     println("Finished proceessing KDE distribution. Min KDE:"+_minKde+ " Max KDE:"+_maxKde); //<>//
     //processKDEDataForThemeRiver();
 
     noLoop();
 }
 
+void writeKDEDataToFile()
+{
+    Table t = new Table();
+    t.addColumn("kdeValue");
+    for(int i=0;i<_distributionValues.length;i++)
+    {
+        TableRow row = t.addRow();
+        row.setFloat("kdeValue",_distributionValues[i]);
+    }
+    
+    saveTable(t,"data/kdeValues.csv");
+}
+
+float[] readKDEDataFromFile()
+{
+    Table t = loadTable("kdeValues.csv","header");
+    _maxKde = t.getFloatList(0).max();
+    _minKde = t.getFloatList(0).min();
+    return t.getFloatList(0).values();
+}
+
 void draw()
 {
-    //noStroke(  );
-    //rectMode(CORNERS); 
-    //rect(10,50,100,5);
     drawDataBars();
     drawExp();
     drawThemeRiver();
@@ -127,9 +155,14 @@ void drawDensityCurve()
 float[] generateKDEDistribution(float[] inputValues)
 {
     float[] result = new float[inputValues.length];
+    
     for (int i =0; i<inputValues.length; i++)
     {
-        result[i] = generateKDEValueForSample(inputValues[i], inputValues);
+        result[i] = generateKDEValueForSample(inputValues[i], inputValues)*multiplier;
+        if (result[i] > _maxKde)
+            _maxKde = result[i];
+        if (result[i] < _minKde)
+            _minKde = result[i];
         _sumKde =+ result[i];
         println("Done iterating over i ->" + i + " KDE Value:" + result[i]);
     }
@@ -147,17 +180,19 @@ float generateKDEValueForSample(float x, float[] inputValues)
         result += getGaussian(x-val, _sigma);
     }
 
-    if (result > _maxKde)
-        _maxKde = result;
-    if (result < _minKde)
-        _minKde = result;
+
 
     return result;
 }
 
+public static double getGaussian1(float x, double sigma) 
+{
+    return Math.exp(-(x*x) / (2*sigma*sigma)) / (Math.sqrt(2 * Math.PI)*sigma);
+}
+
 public static double getGaussian(float x, double sigma) 
 {
-    return Math.exp(-(x*x) / (2*sigma)) / (Math.sqrt(2 * Math.PI)*sigma);
+    return Math.exp(-(x*x));
 }
 
 void drawKDEDistribution(float[] inputValues)
