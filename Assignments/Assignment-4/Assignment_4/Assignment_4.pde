@@ -14,18 +14,18 @@ float barWidth = 5;
 float labelX, labelY;
 int _minBinValue = 100000;
 int _maxBinValue=0;
-double _sigma = 5.0;
+double _sigma = 20.0;
 float[] _distributionValues;
 float _minKde = 10000.0;
 float _maxKde = 0.0;
 float _sumKde = 0.0;
 float _sampleSize = 0.0;
-float multiplier = (float)(Math.exp(-1 / (2*_sigma*_sigma)) / (Math.sqrt(2 * Math.PI)*_sigma));
+float multiplier = 1.0;//(float)(Math.exp(-1 / (2*_sigma*_sigma)) / (Math.sqrt(2 * Math.PI)*_sigma));
 
 void setup() 
 {  
     size(720, 800);  
-    inputTable = loadTable("events-10K.csv");
+    inputTable = loadTable("events-100K.csv");
     println(inputTable.getRowCount());  
     _min = inputTable.getFloatList(0).min();
     _max = inputTable.getFloatList(0).max();
@@ -107,7 +107,7 @@ void drawExp()
         float value = _distributionValues[row];      
         float x = map(row, 0, rowCount, plotX1, plotX2);      
         //float y = map(value, 0, 100.0, kde_plotY2, kde_plotY1);
-        float y = map(value,_minKde, _maxKde + themeRiverYCorrection, kde_plotY2, kde_plotY1);
+        float y = map(value,_minKde, _maxKde + themeRiverYCorrection, kde_plotY2, kde_plotY1); //<>//
         //float y = map(value, _min, _max, plotY2, plotY1);
         curveVertex(x, y);
         smooth();
@@ -185,12 +185,12 @@ float generateKDEValueForSample(float x, float[] inputValues)
     return result;
 }
 
-public static double getGaussian1(float x, double sigma) 
+public static double getGaussian(float x, double sigma) 
 {
     return Math.exp(-(x*x) / (2*sigma*sigma)) / (Math.sqrt(2 * Math.PI)*sigma);
 }
 
-public static double getGaussian(float x, double sigma) 
+public static double getGaussian1(float x, double sigma) 
 {
     return Math.exp(-(x*x));
 }
