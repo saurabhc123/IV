@@ -9,6 +9,8 @@ RectEvaluator mapModel;
 Mappable[] category1Rectangles ;
 Mappable[]  category2Rectangles;
 Mappable[]  leafRectangles;
+PFont f;
+MapItem nodeInfo;
  //<>//
 // CS5764 HW5 Treemap sample code.
 // Make a tree structure out of a categorical csv data table.
@@ -40,40 +42,53 @@ void setup(){
     RectEvaluator category1Evaluator = new RectEvaluator(root.children, w, h,null);
     algorithm.layout(category1Evaluator, category1Bounds);
     root.rectangles = category1Evaluator.items;
+    root.Parent = null;
+    Mappable mappableRoot = new MapItem();
+    mappableRoot.setParent(null);
+    mappableRoot.setBounds(category1Bounds); //<>//
     
        
-    //Calculate the Category-2 rectangles
-    for(int i = 0; i< root.children.length; i++) //<>//
+    //Calculate the Category-1 rectangles - 10 Children
+    for(int i = 0; i< root.children.length; i++)
     {
         Rect currentCategory2Bounds = root.rectangles[i].getBounds();
-        RectEvaluator category2Evaluator = new RectEvaluator(root.children[i].children, currentCategory2Bounds.w , currentCategory2Bounds.h, root.children[i]);
+        RectEvaluator category2Evaluator = new RectEvaluator(root.children[i].children, currentCategory2Bounds.w , currentCategory2Bounds.h, root.rectangles[i]);
         algorithm.layout(category2Evaluator, currentCategory2Bounds);  
         root.children[i].rectangles = category2Evaluator.items;
+        root.children[i].Parent = mappableRoot;
         
-        EvaluateRectanglesForChild(root.children[i]);
+        Mappable mappableParent = new MapItem();
+        mappableParent.setParent(mappableParent);
+        mappableParent.setBounds(currentCategory2Bounds);
+        mappableParent.setName(root.rectangles[i].getName());
+        //mappableParent.setBounds(category1Bounds);
+        
+        EvaluateRectanglesForChild(root.children[i], mappableParent);
         
     }
     
-    //Calculate the leaf rectangles
+    //Calculate the leaf rectangles //<>//
     
   //root.slicemeup() ?
 }
 
-void EvaluateRectanglesForChild(TreeNode node)
+void EvaluateRectanglesForChild(TreeNode node, Mappable parent)
 {
     
     for(int i = 0; i< node.children.length; i++)
     {
         Rect currentCategory2Bounds = node.rectangles[i].getBounds();
-        RectEvaluator category2Evaluator = new RectEvaluator(node.children[i].children, currentCategory2Bounds.w , currentCategory2Bounds.h, node.children[i]);
+        RectEvaluator category2Evaluator = new RectEvaluator(node.children[i].children, currentCategory2Bounds.w , currentCategory2Bounds.h, node.rectangles[i]);
         algorithm.layout(category2Evaluator, currentCategory2Bounds);  
         node.children[i].rectangles = category2Evaluator.items;
+        node.children[i].Parent = parent;
+        //node.Parent = categoryBounds;
     }
 
 }
 
 void draw() {
-  //root.drawme() ?
+  f = createFont("Arial",16,true); // STEP 2 Create Font
   DrawCategoryRects(root.rectangles);
   for(int i = 0; i< root.children.length; i++)
   {
@@ -86,11 +101,34 @@ void draw() {
        }
   }
   
+  //Surround Category 1
+  fill(255,255,255,150);
+  Rect category1Bounds = nodeInfo.getParent().getParent().getBounds();
+  rect((float) category1Bounds.x,(float)  category1Bounds.y,(float) (category1Bounds.x + category1Bounds.w), (float) (category1Bounds.y + category1Bounds.h)); //<>//
+  textFont(f,16);                  // STEP 3 Specify font to be used
+  fill(0);                         // STEP 4 Specify font color 
+  text(nodeInfo.getParent().getParent().getName(),(float)(category1Bounds.x + 5 ), (float)(category1Bounds.y + 15));   // Display Category1
+
+  
+  
+  
+  //Surround Category 2
+  fill(0,0,0, 100);
+  Rect category2Bounds = nodeInfo.getParent().getBounds();
+  rect((float) category2Bounds.x,(float)  category2Bounds.y,(float) (category2Bounds.x + category2Bounds.w), (float) (category2Bounds.y + category2Bounds.h));
+  
+  textFont(f,12);                  // STEP 3 Specify font to be used
+  fill(0);                         // STEP 4 Specify font color 
+  Rect bounds = nodeInfo.getBounds();
+  text(nodeInfo.name,(float)(bounds.x + 5 ), (float)(bounds.y + 15));   // STEP 5 Display Text
+  text(nodeInfo.parent.getName(),(float)(bounds.x + 5 ), (float)(bounds.y + 30));   // STEP 5 Display Text
+  text(str((float)nodeInfo.change)+"%",(float)(bounds.x + 5 ), (float)(bounds.y + 45));   // STEP 5 Display Text
+  text("$"+nodeInfo.price,(float)(bounds.x + 5 ), (float)(bounds.y + 60));   // STEP 5 Display Text
+  
 }
 
 void DrawLeafRects(Mappable[] nodes, float minChange, float maxChange)
 {
-    
     noStroke(  );
     fill(152, 25, 25);
     rectMode(CORNERS);
@@ -100,24 +138,7 @@ void DrawLeafRects(Mappable[] nodes, float minChange, float maxChange)
     for(int i = 0; i< nodes.length; i++)
     {
         c = color(hue, 80, 80);
-        Rect nodeBounds = nodes[i].getBounds();
-        //print(nodes[i].getChange());
-        
-        if(nodes[i].getChange() > 0)
-        {
-            //colorMode(HSB, 360, 255, 200);
-            //fill(c);
-            //colorMode(RGB, 0, 255, 0);
-            fill(0, 255, 0);
-        }
-        else
-        {
-            //colorMode(HSB, 360, 255, 200);
-            //fill(c);
-            //colorMode(RGB, 255, 0, 0);
-            fill(255, 0, 0);
-        }
-        rect((float) nodeBounds.x,(float)  nodeBounds.y,(float) (nodeBounds.x + nodeBounds.w), (float) (nodeBounds.y + nodeBounds.h));      
+        nodes[i].DrawRect();  
     }
 }
 
@@ -146,7 +167,8 @@ public class TreeNode implements Comparable<TreeNode> {
   public boolean isLeaf;     // am i a leaf?
   public TreeNode[] children;// my list of children nodes
   public Mappable[] rectangles;
-
+  public Mappable Parent;
+  
   // Create a tree from csv file, 
   // with lvls number of categoral levels starting at column index 1
   // and using column index sz for the leaf node size data.
@@ -195,16 +217,12 @@ public class TreeNode implements Comparable<TreeNode> {
       maxChange = data.getFloatList("Change").max();
       if(childs[i].isLeaf)
       {
-          //print(data.getFloatColumn("Change")[i]);
           childs[i].change = data.getFloatColumn("Change")[i];
-          //minChange = data.getFloatList("Change").min();
-          //maxChange = data.getFloatList("Change").max();
       }
     }
     return childs;
   }
   
-  // slicing, drawing, ...?
 }
 
  //<>//
@@ -257,12 +275,15 @@ public interface Mappable
     public void   setDepth(int depth);
     public String getName();
     public void   setName(String name);
-    public String getParentName();
-    public void   setParentName(String name);
+    public Mappable getParent();
+    public void   setParent(Mappable name);
     public TreeNode[] getChildren();
     public void   setChildren(TreeNode[] children);
     public double getChange();
-    public void   setChange(double change);
+    public void   setChange(double price);
+    public float getPrice();
+    public void   setPrice(float price);
+    public void DrawRect();
 }
 
 public interface MapModel
@@ -277,12 +298,14 @@ public interface MapModel
 
 public class MapItem implements Mappable {
     double size, change;
+    float price;
     Rect bounds;
     int order = 0;
     int depth;
     String name;
-    String parentName;
+    Mappable parent;
     TreeNode[] children;
+    PShape shape;
 
     public void setDepth(int depth) {
         this.depth = depth;
@@ -318,12 +341,12 @@ public class MapItem implements Mappable {
         this.name = name;
     }
     
-    public String getParentName() {
-        return parentName;
+    public Mappable getParent() {
+        return parent;
     }
 
-    public void setParentName(String parentName) {
-        this.parentName = parentName;
+    public void setParent(Mappable parent) {
+        this.parent = parent;
     }
 
     public Rect getBounds() {
@@ -363,13 +386,63 @@ public class MapItem implements Mappable {
     public void setChange(double change) {
         this.change = change;
     }
+    
+    public float getPrice() {
+        return price;
+    }
+
+    public void setPrice(float price) {
+        this.price = price;
+    }
+    
+    public void DrawRect()
+    {
+        this.shape = createShape(PShape.PATH);
+        this.shape.beginShape();
+        
+        if(this.getChange() > 0)
+        {
+            //colorMode(HSB, 360, 255, 200);
+            //fill(c);
+            //colorMode(RGB, 0, 255, 0);
+            this.shape.fill(0, 255, 0);
+        }
+        else
+        {
+            //colorMode(HSB, 360, 255, 200);
+            //fill(c);
+            //colorMode(RGB, 255, 0, 0);
+            this.shape.fill(255, 0, 0);
+        }
+        
+        Rect bounds = this.getBounds();
+        //this.shape.fill(0,0,255);
+        this.shape.vertex((float)bounds.x,(float)bounds.y);
+        this.shape.vertex((float)(bounds.x + bounds.w),(float)(bounds.y));
+        this.shape.vertex((float)(bounds.x + bounds.w),(float)(bounds.y + bounds.h));
+        this.shape.vertex((float)(bounds.x),(float)(bounds.y + bounds.h));
+        if(this.shape.contains(mouseX,mouseY))
+        {
+            this.shape.fill(0,255,255);
+            nodeInfo = this;
+            
+            //fill(0,0,10);
+            //rect((float) bounds.x - 5,(float)  bounds.y - 5,(float) (bounds.x + 50), (float) (bounds.y + 60));
+        }
+        this.shape.endShape(CLOSE);
+        
+        shape(this.shape);
+        
+        //rect((float) nodeBounds.x,(float)  nodeBounds.y,(float) (nodeBounds.x + nodeBounds.w), (float) (nodeBounds.y + nodeBounds.h));
+        
+    }
 }
 
 public class RectEvaluator implements MapModel {
 
     Mappable[] items;
     
-    public RectEvaluator(TreeNode[] itemRatio,double width, double height, TreeNode parentNode) {
+    public RectEvaluator(TreeNode[] itemRatio,double width, double height, Mappable parentNode) {
         this.items = new MapItem[itemRatio.length];
         double totalArea = width * height;
         //double sum = IntStream.of(itemRatio).sum();
@@ -384,9 +457,10 @@ public class RectEvaluator implements MapModel {
             items[i].setName(itemRatio[i].name);
             items[i].setChildren(itemRatio[i].children);
             items[i].setChange(itemRatio[i].change);
+            items[i].setPrice(itemRatio[i].size);
             if(parentNode != null)
             {
-               items[i].setParentName(parentNode.name); 
+               items[i].setParent(parentNode); 
             }
             
         }
