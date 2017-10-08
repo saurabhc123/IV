@@ -119,7 +119,7 @@ void draw() {
   
   textFont(f,12);                  // STEP 3 Specify font to be used
   fill(0);                         // STEP 4 Specify font color 
-  Rect bounds = nodeInfo.getBounds();
+  Rect bounds = new Rect(mouseX - 60, mouseY - 80,100,100);  // nodeInfo.getBounds();
   text(nodeInfo.name,(float)(bounds.x + 5 ), (float)(bounds.y + 15));   // STEP 5 Display Text
   text(nodeInfo.parent.getName(),(float)(bounds.x + 5 ), (float)(bounds.y + 30));   // STEP 5 Display Text
   text(str((float)nodeInfo.change)+"%",(float)(bounds.x + 5 ), (float)(bounds.y + 45));   // STEP 5 Display Text
