@@ -6,11 +6,11 @@ float _sum = 240;
 ArrayList<Rect> _resultRectantangles = new ArrayList<Rect>();
 TreemapLayout algorithm;
 RectEvaluator mapModel;
-Mappable[] category1Rectangles ;
-Mappable[]  category2Rectangles;
-Mappable[]  leafRectangles;
+IDrawingPrimitive[] category1Rectangles ;
+IDrawingPrimitive[]  category2Rectangles;
+IDrawingPrimitive[]  leafRectangles;
 PFont f;
-MapItem nodeInfo;
+DrawingPrimitive nodeInfo;
  //<>//
 // CS5764 HW5 Treemap sample code.
 // Make a tree structure out of a categorical csv data table.
@@ -43,7 +43,7 @@ void setup(){
     algorithm.layout(category1Evaluator, category1Bounds);
     root.rectangles = category1Evaluator.items;
     root.Parent = null;
-    Mappable mappableRoot = new MapItem();
+    IDrawingPrimitive mappableRoot = new DrawingPrimitive();
     mappableRoot.setParent(null);
     mappableRoot.setBounds(category1Bounds); //<>//
     
@@ -57,7 +57,7 @@ void setup(){
         root.children[i].rectangles = category2Evaluator.items;
         root.children[i].Parent = mappableRoot;
         
-        Mappable mappableParent = new MapItem();
+        IDrawingPrimitive mappableParent = new DrawingPrimitive();
         mappableParent.setParent(mappableParent);
         mappableParent.setBounds(currentCategory2Bounds);
         mappableParent.setName(root.rectangles[i].getName());
@@ -72,7 +72,7 @@ void setup(){
   //root.slicemeup() ?
 }
 
-void EvaluateRectanglesForChild(TreeNode node, Mappable parent)
+void EvaluateRectanglesForChild(TreeNode node, IDrawingPrimitive parent)
 {
     
     for(int i = 0; i< node.children.length; i++)
@@ -96,7 +96,7 @@ void draw() {
        
        for(int j = 0; j< root.children[i].rectangles.length; j++)
        {
-           Mappable[] nodes = root.children[i].children[j].rectangles;
+           IDrawingPrimitive[] nodes = root.children[i].children[j].rectangles;
            DrawLeafRects(nodes, root.children[i].children[j].minChange, root.children[i].children[j].maxChange);
        }
   }
@@ -127,7 +127,7 @@ void draw() {
   
 }
 
-void DrawLeafRects(Mappable[] nodes, float minChange, float maxChange)
+void DrawLeafRects(IDrawingPrimitive[] nodes, float minChange, float maxChange)
 {
     noStroke(  );
     fill(152, 25, 25);
@@ -142,7 +142,7 @@ void DrawLeafRects(Mappable[] nodes, float minChange, float maxChange)
     }
 }
 
-void DrawCategoryRects(Mappable[] nodes)
+void DrawCategoryRects(IDrawingPrimitive[] nodes)
 {
     
     //noStroke(  );
@@ -166,8 +166,8 @@ public class TreeNode implements Comparable<TreeNode> {
   public float size, change, maxChange, minChange;         // my total size, computed from size data column
   public boolean isLeaf;     // am i a leaf?
   public TreeNode[] children;// my list of children nodes
-  public Mappable[] rectangles;
-  public Mappable Parent;
+  public IDrawingPrimitive[] rectangles;
+  public IDrawingPrimitive Parent;
   
   // Create a tree from csv file, 
   // with lvls number of categoral levels starting at column index 1
@@ -231,23 +231,28 @@ public class TreeNode implements Comparable<TreeNode> {
 public class Rect {
     public double x, y, w, h;
 
-    public Rect() {
+    public Rect() 
+    {
         this(0,0,1,1);
     }
 
-    public Rect(Rect r) {
+    public Rect(Rect r) 
+    {
         setRect(r.x, r.y, r.w, r.h);
     }
 
-    public Rect(double x, double y, double w, double h) {
+    public Rect(double x, double y, double w, double h) 
+    {
         setRect(x, y, w, h);
     }
 
-    public double aspectRatio() {
+    public double aspectRatio() 
+    {
         return Math.max(w/h, h/w);
     }
 
-    public void setRect(double x, double y, double w, double h) {
+    public void setRect(double x, double y, double w, double h) 
+    {
         this.x = x;
         this.y = y;
         this.w = w;
@@ -262,21 +267,19 @@ public enum Alignment
 }
 
 
-public interface Mappable
+public interface IDrawingPrimitive
 {
     public double getSize();
     public void   setSize(double size);
     public Rect   getBounds();
     public void   setBounds(Rect bounds);
     public void   setBounds(double x, double y, double w, double h);
-    public int    getOrder();
-    public void   setOrder(int order);
     public int    getDepth();
     public void   setDepth(int depth);
     public String getName();
     public void   setName(String name);
-    public Mappable getParent();
-    public void   setParent(Mappable name);
+    public IDrawingPrimitive getParent();
+    public void   setParent(IDrawingPrimitive name);
     public TreeNode[] getChildren();
     public void   setChildren(TreeNode[] children);
     public double getChange();
@@ -288,38 +291,37 @@ public interface Mappable
 
 public interface MapModel
 {
-    /**
-     * Get the list of items in this model.
-     *
-     * @return An array of the Mappable objects in this MapModel.
-     */
-    public Mappable[] getItems();
+    public IDrawingPrimitive[] getItems();
 }
 
-public class MapItem implements Mappable {
+public class DrawingPrimitive implements IDrawingPrimitive {
     double size, change;
     float price;
     Rect bounds;
     int order = 0;
     int depth;
     String name;
-    Mappable parent;
+    IDrawingPrimitive parent;
     TreeNode[] children;
     PShape shape;
 
-    public void setDepth(int depth) {
+    public void setDepth(int depth) 
+    {
         this.depth = depth;
     }
 
-    public int getDepth() {
+    public int getDepth() 
+    {
         return depth;
     }
 
-    public MapItem() {
+    public DrawingPrimitive() 
+    {
         this(1, 0);
     }
 
-    public MapItem(double size, int order) {
+    public DrawingPrimitive(double size, int order) 
+    {
         this.size = size;
         this.order = order;
         bounds = new Rect();
@@ -333,39 +335,48 @@ public class MapItem implements Mappable {
         this.size = size;
     }
     
-    public String getName() {
+    public String getName() 
+    {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(String name) 
+    {
         this.name = name;
     }
     
-    public Mappable getParent() {
+    public IDrawingPrimitive getParent() 
+    {
         return parent;
     }
 
-    public void setParent(Mappable parent) {
+    public void setParent(IDrawingPrimitive parent) 
+    {
         this.parent = parent;
     }
 
-    public Rect getBounds() {
+    public Rect getBounds() 
+    {
         return bounds;
     }
 
-    public void setBounds(Rect bounds) {
+    public void setBounds(Rect bounds) 
+    {
         this.bounds = bounds;
     }
 
-    public void setBounds(double x, double y, double w, double h) {
+    public void setBounds(double x, double y, double w, double h) 
+    {
         bounds.setRect(x, y, w, h);
     }
 
-    public int getOrder() {
+    public int getOrder() 
+    {
         return order;
     }
 
-    public void setOrder(int order) {
+    public void setOrder(int order) 
+    {
         this.order = order;
     }
     
@@ -379,19 +390,23 @@ public class MapItem implements Mappable {
         this.children = children;
     }
     
-    public double getChange() {
+    public double getChange() 
+    {
         return change;
     }
 
-    public void setChange(double change) {
+    public void setChange(double change) 
+    {
         this.change = change;
     }
     
-    public float getPrice() {
+    public float getPrice() 
+    {
         return price;
     }
 
-    public void setPrice(float price) {
+    public void setPrice(float price) 
+    {
         this.price = price;
     }
     
@@ -440,22 +455,25 @@ public class MapItem implements Mappable {
     }
 }
 
-public class RectEvaluator implements MapModel {
+public class RectEvaluator implements MapModel 
+{
 
-    Mappable[] items;
+    IDrawingPrimitive[] items;
     
-    public RectEvaluator(TreeNode[] itemRatio,double width, double height, Mappable parentNode) {
-        this.items = new MapItem[itemRatio.length];
+    public RectEvaluator(TreeNode[] itemRatio,double width, double height, IDrawingPrimitive parentNode) 
+    {
+        this.items = new DrawingPrimitive[itemRatio.length];
         double totalArea = width * height;
-        //double sum = IntStream.of(itemRatio).sum();
         
         double sum = 0.0;
-        for (int i = 0; i < itemRatio.length; i++) {
+        for (int i = 0; i < itemRatio.length; i++) 
+        {
             sum += itemRatio[i].size;
         }
 
-        for (int i = 0; i < items.length; i++) {
-            items[i] = new MapItem(totalArea / sum * itemRatio[i].size, 0);
+        for (int i = 0; i < items.length; i++) 
+        {
+            items[i] = new DrawingPrimitive(totalArea / sum * itemRatio[i].size, 0);
             items[i].setName(itemRatio[i].name);
             items[i].setChildren(itemRatio[i].children);
             items[i].setChange(itemRatio[i].change);
@@ -468,23 +486,27 @@ public class RectEvaluator implements MapModel {
         }
     }
 
-    public RectEvaluator(int[] itemRatio,int width, int height) {
-        this.items = new MapItem[itemRatio.length];
+    public RectEvaluator(int[] itemRatio,int width, int height) 
+    {
+        this.items = new DrawingPrimitive[itemRatio.length];
         double totalArea = width * height;
         
         double sum = 0.0;
-        for (int i = 0; i < itemRatio.length; i++) {
+        for (int i = 0; i < itemRatio.length; i++) 
+        {
             sum += itemRatio[i];
         }
 
-        for (int i = 0; i < items.length; i++) {
-            items[i] = new MapItem(totalArea / sum * itemRatio[i], 0);
+        for (int i = 0; i < items.length; i++) 
+        {
+            items[i] = new DrawingPrimitive(totalArea / sum * itemRatio[i], 0);
             
         }
     }
 
     @Override
-    public Mappable[] getItems() {
+    public IDrawingPrimitive[] getItems() 
+    {
         return items;
     }
 
@@ -496,24 +518,27 @@ public interface Layout
    public void layout(MapModel model, Rect bounds);
 }
 
-public class TreemapLayout implements Layout {
+public class TreemapLayout implements Layout 
+{
 
     private int mid = 0;
 
-    public void layout(MapModel model, Rect bounds) {
+    public void layout(MapModel model, Rect bounds) 
+    {
         layout(model.getItems(), bounds);
     }
 
-    public void layout(Mappable[] items, Rect bounds)
+    public void layout(IDrawingPrimitive[] items, Rect bounds)
     {
         layout(sortDescending(items),0,items.length-1,bounds);
     }
 
-    public Mappable[] sortDescending(Mappable[] items) {
-        if (items == null || items.length == 0) {
+    public IDrawingPrimitive[] sortDescending(IDrawingPrimitive[] items) {
+        if (items == null || items.length == 0) 
+        {
             return null;
         }
-        Mappable[] inputArr = new Mappable[items.length];
+        IDrawingPrimitive[] inputArr = new IDrawingPrimitive[items.length];
         System.arraycopy(items, 0, inputArr, 0, items.length);
         int length = inputArr.length;
 
@@ -522,18 +547,21 @@ public class TreemapLayout implements Layout {
         return inputArr;
     }
 
-    public void layout(Mappable[] items, int start, int end, Rect bounds)
+    public void layout(IDrawingPrimitive[] items, int start, int end, Rect bounds)
     {
-        if (start>end) {
+        if (start>end) 
+        {
             return;
         }
-        if(start == end) {
+        if(start == end) 
+        {    
             items[start].setBounds(bounds);
         }
 
         this.mid = start;
         while (mid < end) {
-            if (highestAspect(items, start, mid, bounds) > highestAspect(items, start, mid+1, bounds) ) {
+            if (highestAspect(items, start, mid, bounds) > highestAspect(items, start, mid+1, bounds) ) 
+            {
                 mid++;
             } else {
                 Rect newBounds = layoutRow(items, start, mid, bounds);
@@ -542,25 +570,28 @@ public class TreemapLayout implements Layout {
         }
     }
 
-    public double highestAspect(Mappable[] items, int start, int end, Rect bounds) {
+    public double highestAspect(IDrawingPrimitive[] items, int start, int end, Rect bounds) {
         layoutRow(items, start, end, bounds);
         double max = Double.MIN_VALUE;
-        for (int i = start; i <= end; i++) {
-            if (items[i].getBounds().aspectRatio() > max) {
+        for (int i = start; i <= end; i++) 
+        {
+            if (items[i].getBounds().aspectRatio() > max) 
+            {
                 max = items[i].getBounds().aspectRatio();
             }
         }
         return max;
     }
 
-    public Rect layoutRow(Mappable[] items, int start, int end, Rect bounds) {
+    public Rect layoutRow(IDrawingPrimitive[] items, int start, int end, Rect bounds) {
         boolean isHorizontal = bounds.w > bounds.h;
         double total = bounds.w * bounds.h; //totalSize(items, 0, items.length-1);
         double rowSize = totalSize(items, start, end);
         double rowRatio = rowSize / total;
         double offset=0;
 
-        for (int i = start; i <= end; i++) {
+        for (int i = start; i <= end; i++) 
+        {
             Rect r=new Rect();
             double ratio=items[i].getSize() / rowSize;
 
@@ -578,7 +609,8 @@ public class TreemapLayout implements Layout {
             items[i].setBounds(r);
             offset+=ratio;
         }
-        if (isHorizontal) {
+        if (isHorizontal) 
+        {
             return new Rect(bounds.x + bounds.w * rowRatio, bounds.y, bounds.w - bounds.w * rowRatio, bounds.h);
         } else {
             return new Rect(bounds.x, bounds.y + bounds.h * rowRatio, bounds.w, bounds.h - bounds.h * rowRatio);
@@ -586,18 +618,21 @@ public class TreemapLayout implements Layout {
     }
 
 
-    public  double totalSize(Mappable[] items) {
+    public  double totalSize(IDrawingPrimitive[] items) 
+    {
         return totalSize(items, 0, items.length - 1);
     }
 
-    public double totalSize(Mappable[] items, int start, int end) {
+    public double totalSize(IDrawingPrimitive[] items, int start, int end) 
+    {
         double sum = 0;
         for (int i = start; i <= end; i++)
             sum += items[i].getSize();
         return sum;
     }
 
-    private void quickSortDesc(Mappable[] inputArr, int lowerIndex, int higherIndex) {
+    private void quickSortDesc(IDrawingPrimitive[] inputArr, int lowerIndex, int higherIndex) 
+    {
 
        int i = lowerIndex;
        int j = higherIndex;
@@ -612,7 +647,7 @@ public class TreemapLayout implements Layout {
                j--;
            }
            if (i <= j) {
-               Mappable temp = inputArr[i];
+               IDrawingPrimitive temp = inputArr[i];
                inputArr[i] = inputArr[j];
                inputArr[j] = temp;
 
