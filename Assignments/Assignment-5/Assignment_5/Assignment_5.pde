@@ -9,6 +9,8 @@ void setup()
     //values.append(new float[]{60,60,60,60});
     size(60,40);
     values.append(new float[]{6.0,6.0,4.0,3.0,2.0,2.0,1.0});
+    //size(30,40);
+    //values.append(new float[]{4.0,3.0,2.0,2.0,1.0});
     squarify(values,null,new Rect(0,0,width,height,values.sum()));
 }
 
@@ -32,7 +34,7 @@ void squarify(FloatList values, Row row, Rect input)
         row = new Row();
         float val = (float)values.get(0);
         float newRectWidth,newRectHeight=0.0;
-        if(input.getWidth() > input.getHeight()) //Width is more, so do a slice/vertical partition
+        if(input.getWidth() > input._height) //Width is more, so do a slice/vertical partition
         {
             row._alignment = Alignment.VERTICAL;
             newRectWidth = (val*input.getWidth()/sum);
@@ -64,7 +66,7 @@ void squarify(FloatList values, Row row, Rect input)
     println(rowWidth);
     //temp +=1;
     float proposedRowWidth = row._alignment == Alignment.HORIZONTAL? row.getWidth(): (temp*inputWidth)/sum + row.getWidth();
-    float proposedRowHeight = row._alignment == Alignment.VERTICAL? (temp*input.getHeight())/sum + row.getHeight(): row.getHeight();
+    float proposedRowHeight = row._alignment == Alignment.VERTICAL? row.getHeight(): (temp*input.getHeight())/sum + row.getHeight();
     float proposedMaxItemWidth = row._alignment == Alignment.HORIZONTAL? (row._maxValue/(val + row.getSumValues())) * proposedRowWidth : proposedRowWidth;
     float proposedMaxItemHeight = row._alignment == Alignment.VERTICAL? (row._maxValue/(val + row.getSumValues())) * proposedRowHeight : proposedRowHeight;
     
@@ -78,6 +80,13 @@ void squarify(FloatList values, Row row, Rect input)
         row.add(new Rect(row._originX + newRectWidth, row._originY + newRectHeight ,newRectWidth, newRectHeight, val));
         values.remove(0);
         squarify(values, row,new Rect(row._originX + proposedRowWidth, row._originY + proposedRowWidth ,width, height,0));
+    }
+    else
+    {
+         _resultRectantangles.addAll(row._rectangles);
+         float remainingRectOriginX = row._alignment == Alignment.VERTICAL?  row.getWidth() : width - row.getWidth();
+         float remainingRectOriginY = row._alignment == Alignment.VERTICAL ? height - row.getHeight() : row.getHeight();
+         squarify(values, null, new Rect(remainingRectOriginX, remainingRectOriginY, width - remainingRectOriginX, height - remainingRectOriginY, val));
     }
     
 }
@@ -157,9 +166,13 @@ public class Row
         }
         else
         {
-            _width += _alignment == Alignment.VERTICAL ? r._width:0.0f;
-            _height += _alignment == Alignment.HORIZONTAL ? r._height:0.0f;
+            //_width += _alignment == Alignment.VERTICAL ? r._width:0.0f;
+            //_height += _alignment == Alignment.VERTICAL ? 0.0f : r._height;
         }
+        
+        //_width += _alignment == Alignment.VERTICAL ? r._width:0.0f;
+        //_height += _alignment == Alignment.VERTICAL ? 0.0f : r._height;
+        
         _rectangles.add(r);
         _lastAddedRectangle = r;
 
@@ -178,11 +191,11 @@ public class Row
         _rectangles.add(r);
         _lastAddedRectangle = r;
         _width = _alignment == Alignment.VERTICAL ? newWidth: 0.0f;
-        _height = _alignment == Alignment.HORIZONTAL ? newWidth: 0.0f;
+        _height = _alignment == Alignment.HORIZONTAL ? newHeight: 0.0f;
         reshapeRectangles();
     }
     
-    void reshapeRectangles() //<>//
+    void reshapeRectangles()
     {
         float originXOffset = _originX; 
         float originYOffset = _originY;

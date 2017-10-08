@@ -113,7 +113,7 @@ void draw() {
   
   
   //Surround Category 2
-  fill(0,0,0, 100);
+  fill(5,5,5, 100);
   Rect category2Bounds = nodeInfo.getParent().getBounds();
   rect((float) category2Bounds.x,(float)  category2Bounds.y,(float) (category2Bounds.x + category2Bounds.w), (float) (category2Bounds.y + category2Bounds.h));
   
@@ -131,7 +131,7 @@ void DrawLeafRects(Mappable[] nodes, float minChange, float maxChange)
 {
     noStroke(  );
     fill(152, 25, 25);
-    rectMode(CORNERS);
+    //rectMode(CORNERS);
     color c;
     float hue = 50;
     float brightness = 60;
@@ -400,19 +400,21 @@ public class MapItem implements Mappable {
         this.shape = createShape(PShape.PATH);
         this.shape.beginShape();
         
-        if(this.getChange() > 0)
+        double change = this.getChange();
+        if(change > 0)
         {
-            //colorMode(HSB, 360, 255, 200);
+            
             //fill(c);
             //colorMode(RGB, 0, 255, 0);
-            this.shape.fill(0, 255, 0);
+            int colorValue = (int) map((float)change, 0.0, 12.0, 100.0,255.0);
+            this.shape.fill(0, colorValue, 0);
+            //colorMode(HSB, 180, 100, 50);
         }
         else
         {
-            //colorMode(HSB, 360, 255, 200);
-            //fill(c);
-            //colorMode(RGB, 255, 0, 0);
-            this.shape.fill(255, 0, 0);
+           int colorValue = (int) map((float)change, 0.0, -15.0, 225.0,80.0);
+            this.shape.fill(colorValue, 0, 0);
+            //colorMode(HSB, 360, 255, 100);
         }
         
         Rect bounds = this.getBounds();
