@@ -3,7 +3,7 @@
 // You are free to use or modify as much of this as you want.
 
 // data parameters:
-int maxI = 1000000;  // a big number
+int maxI = 1000000;  // a big number. Keep modifying.
 
 float[] data = new float[maxI];
 float minD, maxD;
