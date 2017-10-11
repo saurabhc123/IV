@@ -29,7 +29,13 @@ public class DataProcessor implements Runnable
         println("Processed all data.");
         return;
     }
-      
+    
+    //Not that useful as it gets very granular for this.
+    //if(skip_every_n <= skip_reduction)
+    //{
+        //skip_reduction /= 10;
+    //}
+    
     sampleSize = data.length / skip_every_n;
       
     //https://beginnersbook.com/2013/12/how-to-synchronize-arraylist-in-java-with-example/
@@ -42,12 +48,14 @@ public class DataProcessor implements Runnable
         processedData = new float[sampleSize];
         processedData[0] = 0.0;
         for (int i=1; i<sampleSize; i++)
-            processedData[i] =  data[i * skip_every_n];
+            processedData[i] =  getSampleData(i);//data[i * skip_every_n];
         println(processedData.length);
         println(processedData[processedData.length/2]);
+        println("Sample size: "+ sampleSize);
         println("Skipping every "+ skip_every_n + " samples.");
-        println("Done generating data");
+        //println("Done generating data");
         skip_every_n -= skip_reduction; 
+        //skip_every_n /= 2; 
     }
   }
   
@@ -55,10 +63,10 @@ public class DataProcessor implements Runnable
   float getSampleData(int index)
   {
      float sum = 0.0;
-     for(int i = index * sampleSize; i< (index + 1) * sampleSize;i++)
-         sum = data[i]/sampleSize;
+     for(int i = index * skip_every_n; i< (index + 1) * skip_every_n;i++)
+         sum = data[i];
       
-      return sum/(index);
+      return sum/(skip_every_n);
   }
   
   public float[] getDataPoints()
