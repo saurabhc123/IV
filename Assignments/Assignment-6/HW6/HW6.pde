@@ -42,6 +42,7 @@ void draw() {
     float y = map(retrievedData[i], minD, maxD, height-1, 0.0);
     point(x, y);
   }
+  dp.run();
 }
 
 float[] getData1()

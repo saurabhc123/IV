@@ -15,7 +15,8 @@ public class DataProcessor implements Runnable
   {    
     this.inputData = inputData;
     Thread thread = new Thread(this);    
-    thread.start(  );
+    thread.start();
+    this.run();
   }
   
   public boolean isLocked()
@@ -42,7 +43,7 @@ public class DataProcessor implements Runnable
     
     processedData = new float[sampleSize];
     //multiplier = inputData.length/(sampleSize);
-    synchronized(processedData)
+    //synchronized(processedData)
     {
         println("Generating data");
         processedData = new float[sampleSize];
@@ -71,8 +72,8 @@ public class DataProcessor implements Runnable
   
   public float[] getDataPoints()
   {
-    this.run();
-    synchronized(processedData)
+    //this.run();
+    //synchronized(processedData)
     {
         println("Asked for data");      
         return processedData;
