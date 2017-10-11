@@ -4,14 +4,16 @@ import java.util.Collections;
 
 public class DataProcessor implements Runnable 
 {  
-  float[] processedData = new float[10];
+  
   boolean locked = false;
   int multiplier = 1;
+  int sampleSize = 1;
+  float[] processedData = new float[sampleSize];
+  float[] inputData;
   
-  
-  public DataProcessor() 
+  public DataProcessor(float[] inputData) 
   {    
-    
+    this.inputData = inputData;
     Thread thread = new Thread(this);    
     thread.start(  );
   }
@@ -24,19 +26,23 @@ public class DataProcessor implements Runnable
   public void run(  ) 
   {    
     //https://beginnersbook.com/2013/12/how-to-synchronize-arraylist-in-java-with-example/
+    if(sampleSize > inputData.length){
+        println("Processed all data.");
+        return;
+    }
     
-    
+    multiplier = inputData.length/(sampleSize);
     synchronized(processedData)
     {
         println("Generating data");
-        processedData = new float[maxI * multiplier];
+        processedData = new float[sampleSize];
         processedData[0] = 0.0;
-        for (int i=1; i<processedData.length; i++)
-            processedData[i] = processedData[i-1] + random(-1.0, 1.0);
+        for (int i=1; i<sampleSize; i++)
+            processedData[i] = data[i* multiplier];
         println(processedData.length);
         println(processedData[processedData.length/2]);
         println("Done generating data");
-        multiplier *= 2; 
+        sampleSize += 100000; 
     }
   }
   

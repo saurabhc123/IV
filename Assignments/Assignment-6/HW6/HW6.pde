@@ -3,11 +3,11 @@
 // You are free to use or modify as much of this as you want.
 
 // data parameters:
-int maxI = 1000;  // a big number
+int maxI = 1000000;  // a big number
 
 float[] data = new float[maxI];
 float minD, maxD;
-DataProcessor dp = new DataProcessor();
+DataProcessor dp;
 
 void setup() {
   size(1000, 800);
@@ -15,8 +15,9 @@ void setup() {
   data[0] = 0.0;
   for (int i=1; i<maxI; i++)
     data[i] = data[i-1] + random(-1.0, 1.0);
-  minD = min(data);
-  maxD = max(data);
+  dp = new DataProcessor(data);
+  //minD = min(data);
+  //maxD = max(data);
   
   //while(true)
   {
@@ -30,13 +31,15 @@ void draw() {
   // very simple timeseries visualization, VERY slow
   stroke(255);
   float[] retrievedData = getData1();
+  minD = min(retrievedData);
+  maxD = max(retrievedData);
   println("Got " + retrievedData.length + " items");
   for (int i=0; i<retrievedData.length; i++) 
   {
-    float x = map(i, 0, maxI-1, 0, width-1);
+    float x = map(i, 0, retrievedData.length-1, 0, width-1); //<>//
     float y = map(retrievedData[i], minD, maxD, height-1, 0.0);
     point(x, y);
-  } //<>//
+  }
 }
 
 float[] getData1()
