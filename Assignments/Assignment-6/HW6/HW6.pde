@@ -3,7 +3,9 @@
 // You are free to use or modify as much of this as you want.
 
 // data parameters:
-int maxI = 1000000;  // a big number. Keep modifying.
+int maxI = 10000000;  // a big number. Keep modifying.
+int skip_every_n = 10000;
+int skip_reduction = 50;
 
 float[] data = new float[maxI];
 float minD, maxD;
@@ -34,9 +36,9 @@ void draw() {
   minD = min(retrievedData);
   maxD = max(retrievedData);
   println("Got " + retrievedData.length + " items");
-  for (int i=0; i<retrievedData.length; i++) 
+  for (int i=0; i<retrievedData.length; i++)  //<>//
   {
-    float x = map(i, 0, retrievedData.length-1, 0, width-1); //<>//
+    float x = map(i, 0, retrievedData.length-1, 0, width-1);
     float y = map(retrievedData[i], minD, maxD, height-1, 0.0);
     point(x, y);
   }
