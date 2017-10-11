@@ -4,7 +4,7 @@ import java.util.Collections;
 
 public class DataProcessor implements Runnable 
 {  
-  ArrayList<DataPoint> datapoints = null;//= new ArrayList<DataPoint>();
+  float[] processedData = new float[10];
   boolean locked = false;
   int multiplier = 1;
   
@@ -26,35 +26,28 @@ public class DataProcessor implements Runnable
     //https://beginnersbook.com/2013/12/how-to-synchronize-arraylist-in-java-with-example/
     
     
-    synchronized(datapoints)
+    synchronized(processedData)
     {
-        if(!locked)
-        {
-            locked = true;
-            datapoints = new ArrayList<DataPoint>();
-            float[] data1 = new float[maxI];
-            println("Starting "+ maxI + " items");
-            for (int i=0; i< maxI ; i++) 
-            {
-              float x = map(i, 0, maxI-1, 0, width-1);
-              float y = map(data1[i], minD, maxD, height-1, 0.0);
-              //point(x, y);
-              //println("X:%f, Y:%f",x,y);
-              datapoints.add(new DataPoint(x,y));
-            }
-            //println("X:%f, Y:%f",x,y);
-            println("Processed "+ maxI + " items");
-            //multiplier = multiplier * 10;
-            maxI = maxI ;//* 10;
-            locked = false;
-        }
+        println("Generating data");
+        processedData = new float[maxI * multiplier];
+        processedData[0] = 0.0;
+        for (int i=1; i<processedData.length; i++)
+            processedData[i] = processedData[i-1] + random(-1.0, 1.0);
+        println(processedData.length);
+        println(processedData[processedData.length/2]);
+        println("Done generating data");
+        multiplier *= 2; 
     }
   }
   
-  public ArrayList<DataPoint> getDataPoints()
+  public float[] getDataPoints()
   {
-      
-      return datapoints;  
+    this.run();
+    synchronized(processedData)
+    {
+        println("Asked for data");      
+        return processedData;
+    }
   }
 }
 
