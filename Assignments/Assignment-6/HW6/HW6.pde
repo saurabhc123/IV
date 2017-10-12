@@ -4,7 +4,7 @@ import java.util.Arrays;
 // You are free to use or modify as much of this as you want.
 
 // data parameters:
-int maxI = 100000000;  // a big number. Keep modifying.
+int maxI = 10000000;  // a big number. Keep modifying.
 //int skip_every_n = 10000;
 //int skip_reduction = 200;
 
@@ -60,15 +60,15 @@ void mousePressed()
 void mouseReleased() 
 {
   //println("Mouse dragged from "+ pmouseX + "," + pmouseY + "to" + mouseX + "," + mouseY);
-  selectedOriginX = selectedOriginXTemp;
+  selectedOriginX = selectedOriginXTemp < mouseX ? selectedOriginXTemp:mouseX;
   selectedOriginY = 0;
-  selectedEndX = mouseX - selectedOriginX;
+  selectedEndX = selectedOriginXTemp < mouseX ? mouseX - selectedOriginX : selectedOriginXTemp - mouseX;
   selectedEndY = height/2 - 20;
   int startIndex = (int)(data.length * (selectedOriginX/width));
   int endIndex = (int)(data.length * ((selectedEndX + selectedOriginX)/width));
   println("Have to render from " + startIndex + " to " + endIndex + "to process "+ (endIndex - startIndex) + " items.");
-  float[] newArray = Arrays.copyOfRange(data, startIndex, endIndex);
-  detailsProcessor =  new DataProcessor(newArray);
+  //float[] newArray = Arrays.copyOfRange(data, startIndex, endIndex);
+  detailsProcessor =  new DataProcessor(data,startIndex, endIndex);
   detailsProcessor.run();
 }
 
