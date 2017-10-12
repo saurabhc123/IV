@@ -10,9 +10,16 @@ public class DataProcessor implements Runnable
   int sampleSize = 0;
   float[] processedData = null;//new float[sampleSize];
   float[] inputData;
+  boolean skipDataEveryN;
   
   public DataProcessor(float[] inputData) 
   {    
+    this(inputData, true);
+  }
+  
+  public DataProcessor(float[] inputData, boolean skipData) 
+  {    
+    this.skipDataEveryN = skipData;
     this.inputData = inputData;
     Thread thread = new Thread(this);    
     thread.start();
@@ -24,7 +31,7 @@ public class DataProcessor implements Runnable
       return locked;
   }
   
-  public void run(  ) 
+  public void run() 
   {    
     if(skip_every_n <= 0){
         println("Processed all data.");
@@ -37,7 +44,14 @@ public class DataProcessor implements Runnable
         //skip_reduction /= 10;
     //}
     
-    sampleSize = data.length / skip_every_n;
+    if(this.skipDataEveryN)
+    {
+        sampleSize = this.inputData.length / skip_every_n;
+    }
+    else
+    {
+        sampleSize = this.inputData.length;
+    }
       
     //https://beginnersbook.com/2013/12/how-to-synchronize-arraylist-in-java-with-example/
     
@@ -49,25 +63,37 @@ public class DataProcessor implements Runnable
         processedData = new float[sampleSize];
         processedData[0] = 0.0;
         for (int i=1; i<sampleSize; i++)
-            processedData[i] =  getSampleData(i);//data[i * skip_every_n];
+        {
+            if(this.skipDataEveryN)
+                processedData[i] =  getSampleData(i,skip_every_n);//data[i * skip_every_n];
+            else
+                processedData[i] =  getSampleData(i,skip_every_n_details);
+        }
         println(processedData.length);
         println(processedData[processedData.length/2]);
         println("Sample size: "+ sampleSize);
         println("Skipping every "+ skip_every_n + " samples.");
         //println("Done generating data");
-        skip_every_n -= skip_reduction; 
-        //skip_every_n /= 2; 
+        if(this.skipDataEveryN)
+        {
+            skip_every_n -= skip_reduction; 
+            //skip_every_n /= 2; 
+        }
     }
   }
   
   
-  float getSampleData(int index)
+  float getSampleData(int index, int skip_value)
   {
      float sum = 0.0;
-     for(int i = index * skip_every_n; i< (index + 1) * skip_every_n;i++)
-         sum = data[i];
-      
-      return sum/(skip_every_n);
+     for(int i = index * skip_value; i< (index + 1) * skip_value;i++)
+         sum = this.inputData[i];
+     return sum/(skip_value);
+  }
+  
+  float getDataAtIndex(int index)
+  {
+     return this.inputData[index];
   }
   
   public float[] getDataPoints()
