@@ -10,10 +10,13 @@ public class DataProcessor implements Runnable
   int sampleSize = 0;
   float[] processedData = null;//new float[sampleSize];
   float[] inputData;
+  int skip_every_n, skip_reduction;
   
   public DataProcessor(float[] inputData) 
   {    
     this.inputData = inputData;
+    skip_every_n = this.inputData.length/10000;
+    skip_reduction = skip_every_n/50;
     Thread thread = new Thread(this);    
     thread.start();
     this.run();
@@ -37,7 +40,7 @@ public class DataProcessor implements Runnable
         //skip_reduction /= 10;
     //}
     
-    sampleSize = data.length / skip_every_n;
+    sampleSize = inputData.length / skip_every_n;
       
     //https://beginnersbook.com/2013/12/how-to-synchronize-arraylist-in-java-with-example/
     
@@ -65,7 +68,7 @@ public class DataProcessor implements Runnable
   {
      float sum = 0.0;
      for(int i = index * skip_every_n; i< (index + 1) * skip_every_n;i++)
-         sum = data[i];
+         sum = inputData[i];
       
       return sum/(skip_every_n);
   }

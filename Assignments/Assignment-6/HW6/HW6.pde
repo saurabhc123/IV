@@ -3,13 +3,15 @@
 // You are free to use or modify as much of this as you want.
 
 // data parameters:
-int maxI = 100000000;  // a big number. Keep modifying.
-int skip_every_n = 10000;
-int skip_reduction = 200;
+int maxI = 1000000;  // a big number. Keep modifying.
+//int skip_every_n = 10000;
+//int skip_reduction = 200;
 
 float[] data = new float[maxI];
 float minD, maxD;
 DataProcessor dp;
+
+float selectedOriginX, selectedOriginY,selectedOriginXTemp, selectedOriginYTemp, selectedEndX, selectedEndY;
 
 void setup() {
   size(1000, 800);
@@ -23,32 +25,73 @@ void setup() {
   
   //while(true)
   {
-      float[] retrievedData = getData1();
+      float[] retrievedData = getData(dp);
       println("Got " + retrievedData.length + " items"); //<>//
   }
 }
 
-void draw() {
-  background(0);
-  // very simple timeseries visualization, VERY slow
-  stroke(255);
-  float[] retrievedData = getData1();
-  minD = min(retrievedData);
-  maxD = max(retrievedData);
-  //println("Got " + retrievedData.length + " items");
-  for (int i=0; i<retrievedData.length; i++)  //<>//
-  {
-    float x = map(i, 0, retrievedData.length-1, 0, width-1);
-    float y = map(retrievedData[i], minD, maxD, height-1, 0.0);
-    point(x, y);
-  }
+void draw() { //<>//
+  background(255);
+  // very simple timeseries visualization, VERY slow //<>//
+  stroke(0);
+  float[] retrievedData = getData(dp);
+  renderOverview(retrievedData);
+  renderDetails(retrievedData); //<>//
   dp.run();
+  stroke(0);
+  fill(0,0,220,100);
+  rect(selectedOriginX, selectedOriginY, selectedEndX, selectedEndY); 
+  //detailsProcessor.run();
 }
 
-float[] getData1()
+void mousePressed() 
+{
+  //println("Mouse dragged from "+ pmouseX + "," + pmouseY + "to" + mouseX + "," + mouseY);
+  selectedOriginXTemp = mouseX;
+  selectedOriginYTemp = mouseY;
+}
+
+void mouseReleased() 
+{
+  //println("Mouse dragged from "+ pmouseX + "," + pmouseY + "to" + mouseX + "," + mouseY);
+  selectedOriginX = selectedOriginXTemp;
+  selectedOriginY = 0;
+  selectedEndX = mouseX - selectedOriginX;
+  selectedEndY = height/2 - 20;
+  int startIndex = (int)(data.length * (selectedOriginX/width));
+  int endIndex = (int)(data.length * ((selectedEndX + selectedOriginX)/width));
+  println("Have to render from " + startIndex + " to " + endIndex);
+}
+
+void renderDetails(float[] retrievedData)
+{
+    //retrievedData = getData(detailsProcessor);
+    println("Details has " + retrievedData.length + " items");
+    renderPoints(retrievedData, 0.0,height/2 + 20, width, height);
+}
+
+void renderOverview(float[] retrievedData)
+{
+    renderPoints(retrievedData, 0.0,0.0, width, height/2 - 20);
+}
+
+void renderPoints(float[] retrievedData, float originX, float originY, float w, float h)
+{
+  float min = min(retrievedData);
+  float max = max(retrievedData);
+  //println("Got " + retrievedData.length + " items");
+  for (int i=0; i<retrievedData.length; i++) 
+  {
+    float x = map(i, 0, retrievedData.length-1, originX, w-1);
+    float y = map(retrievedData[i], min, max, h-1, originY);
+    point(x, y);
+  }
+}
+
+float[] getData(DataProcessor d)
 {
     //DataProcessor dp = new DataProcessor();
-    float[] retrievedData = dp.getDataPoints();
+    float[] retrievedData = d.getDataPoints();
     return retrievedData;
 }
 
