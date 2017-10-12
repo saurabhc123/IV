@@ -1,15 +1,17 @@
+import java.util.Arrays;
 // CS5764 InfoVis 
 // Some sample code for HW6.
 // You are free to use or modify as much of this as you want.
 
 // data parameters:
-int maxI = 1000000;  // a big number. Keep modifying.
+int maxI = 100000000;  // a big number. Keep modifying.
 //int skip_every_n = 10000;
 //int skip_reduction = 200;
 
 float[] data = new float[maxI];
 float minD, maxD;
 DataProcessor dp;
+DataProcessor detailsProcessor;
 
 float selectedOriginX, selectedOriginY,selectedOriginXTemp, selectedOriginYTemp, selectedEndX, selectedEndY;
 
@@ -20,6 +22,7 @@ void setup() {
   for (int i=1; i<maxI; i++)
     data[i] = data[i-1] + random(-1.0, 1.0);
   dp = new DataProcessor(data);
+  detailsProcessor =  new DataProcessor(data);
   //minD = min(data);
   //maxD = max(data);
   
@@ -29,19 +32,22 @@ void setup() {
       println("Got " + retrievedData.length + " items"); //<>//
   }
 }
-
+ //<>//
 void draw() { //<>//
   background(255);
-  // very simple timeseries visualization, VERY slow //<>//
-  stroke(0);
+  // very simple timeseries visualization, VERY slow
+  stroke(0); //<>//
   float[] retrievedData = getData(dp);
+  float[] detailedData = getData(detailsProcessor);
   renderOverview(retrievedData);
-  renderDetails(retrievedData); //<>//
-  dp.run();
+  renderDetails(detailedData);
+  
   stroke(0);
   fill(0,0,220,100);
   rect(selectedOriginX, selectedOriginY, selectedEndX, selectedEndY); 
-  //detailsProcessor.run();
+  dp.run();
+  detailsProcessor.run();
+  println("Details Processor has " + detailsProcessor.inputData.length + " items.");
 }
 
 void mousePressed() 
@@ -60,7 +66,10 @@ void mouseReleased()
   selectedEndY = height/2 - 20;
   int startIndex = (int)(data.length * (selectedOriginX/width));
   int endIndex = (int)(data.length * ((selectedEndX + selectedOriginX)/width));
-  println("Have to render from " + startIndex + " to " + endIndex);
+  println("Have to render from " + startIndex + " to " + endIndex + "to process "+ (endIndex - startIndex) + " items.");
+  float[] newArray = Arrays.copyOfRange(data, startIndex, endIndex);
+  detailsProcessor =  new DataProcessor(newArray);
+  detailsProcessor.run();
 }
 
 void renderDetails(float[] retrievedData)

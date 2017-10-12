@@ -16,7 +16,7 @@ public class DataProcessor implements Runnable
   {    
     this.inputData = inputData;
     skip_every_n = this.inputData.length/10000;
-    skip_reduction = skip_every_n/50;
+    skip_reduction = skip_every_n/500;
     Thread thread = new Thread(this);    
     thread.start();
     this.run();
@@ -48,14 +48,14 @@ public class DataProcessor implements Runnable
     //multiplier = inputData.length/(sampleSize);
     //synchronized(processedData)
     {
-        println("Generating data");
+        //println("Generating data");
         processedData = new float[sampleSize];
         processedData[0] = 0.0;
         for (int i=1; i<sampleSize; i++)
             processedData[i] =  getSampleData(i);//data[i * skip_every_n];
-        println(processedData.length);
-        println(processedData[processedData.length/2]);
-        println("Sample size: "+ sampleSize);
+        //println(processedData.length);
+        //println(processedData[processedData.length/2]);
+        //println("Sample size: "+ sampleSize);
         println("Skipping every "+ skip_every_n + " samples.");
         //println("Done generating data");
         skip_every_n -= skip_reduction; 
@@ -78,7 +78,7 @@ public class DataProcessor implements Runnable
     //this.run();
     //synchronized(processedData)
     {
-        println("Asked for data");      
+        //println("Asked for data");      
         return processedData;
     }
   }
