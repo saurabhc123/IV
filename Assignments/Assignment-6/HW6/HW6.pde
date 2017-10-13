@@ -11,7 +11,7 @@ int maxI = 1000000;  // a big number. Keep modifying.
 float[] data = new float[maxI];
 float minD, maxD;
 DataProcessor dp;
-DataProcessor detailsProcessor;
+DetailsDataProcessor detailsProcessor;
 PFont f;
 boolean rectInProgress = false;
 
@@ -25,7 +25,7 @@ void setup() {
   for (int i=1; i<maxI; i++)
     data[i] = data[i-1] + random(-1.0, 1.0);
   dp = new DataProcessor(data);
-  detailsProcessor =  new DataProcessor(data);
+  detailsProcessor =  new DetailsDataProcessor(data);
   //minD = min(data);
   //maxD = max(data);
   
@@ -95,14 +95,16 @@ void mouseReleased()
   int endIndex = (int)(data.length * ((selectedEndX + selectedOriginX)/width));
   println("Have to render from " + startIndex + " to " + endIndex + "to process "+ (endIndex - startIndex) + " items.");
   //float[] newArray = Arrays.copyOfRange(data, startIndex, endIndex);
-  detailsProcessor =  new DataProcessor(data,startIndex, endIndex);
-  detailsProcessor.run();
+  detailsProcessor =  new DetailsDataProcessor(data,startIndex, endIndex);
+  detailsProcessor.run(); //<>// //<>//
   rectInProgress = false;
 }
 
 void renderDetails(float[] retrievedData)
 {
     //retrievedData = getData(detailsProcessor);
+    if(retrievedData == null)
+        return;
     println("Details has " + retrievedData.length + " items");
     
     fill(255,0,0);                         // STEP 4 Specify font color 
@@ -133,6 +135,14 @@ void renderPoints(float[] retrievedData, float originX, float originY, float w, 
 }
 
 float[] getData(DataProcessor d)
+{
+    //DataProcessor dp = new DataProcessor();
+    float[] retrievedData = d.getDataPoints();
+    return retrievedData;
+}
+
+
+float[] getData(DetailsDataProcessor d)
 {
     //DataProcessor dp = new DataProcessor();
     float[] retrievedData = d.getDataPoints();

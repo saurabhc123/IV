@@ -28,13 +28,19 @@ public class DataProcessor implements Runnable
   
   public DataProcessor(float[] inputData, int inputStart, int inputEnd) 
   {    
+    if(this.inputData == null)
+        return;
     this.inputData = inputData;
     this.inputStartIndex = inputStart;
     this.inputEndIndex = inputEnd;
-    float powOf10 = log(getInputSize())/log(10);
+    int powOf10 = (int)(log(getInputSize())/log(10));
     println("Power: "+ powOf10);
-    skip_every_n = (this.inputEndIndex - this.inputStartIndex)/pow(10, (int)powOf10 - 2);
-    skip_reduction = skip_every_n/pow(10, (int)powOf10 - 3);
+    skip_every_n = (this.inputEndIndex - this.inputStartIndex)/pow(10, (int)powOf10 - 5);
+    skip_reduction = 8*skip_every_n/(pow(10, powOf10-6));
+    if(skip_every_n <1){
+        
+        skip_reduction = 1;
+    }
     Thread thread = new Thread(this);    
     thread.start();
     this.run();
@@ -52,19 +58,22 @@ public class DataProcessor implements Runnable
   public boolean isLocked()
   {
       return locked;
-  }
+  } //<>//
   
   public void run(  ) 
   {    
-    if(skip_every_n <= 0){
+    println("skip_every_n: "+ skip_every_n);
+    println("skip_reduction: "+ skip_reduction);
+    if(skip_every_n <= 4){
         println("Processed all data.");
         return;
     }
+
     
     //Not that useful as it gets very granular for this.
-    if(skip_every_n <= skip_reduction)
+    //if(skip_every_n <= skip_reduction)
     {
-        skip_reduction /= 10;
+        //skip_reduction /= 10;
     }
     
     sampleSize = (this.inputEndIndex - this.inputStartIndex) / skip_every_n;
