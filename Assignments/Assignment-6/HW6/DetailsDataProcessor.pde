@@ -3,7 +3,7 @@ import java.util.Collections;
 
 
 
-public class DataProcessor implements Runnable 
+public class DetailsDataProcessor implements Runnable 
 {  
   
   boolean locked = false;
@@ -13,10 +13,9 @@ public class DataProcessor implements Runnable
   float[] inputData;
   int skip_every_n, skip_reduction;
   int inputStartIndex, inputEndIndex;
-  
   boolean processingCompleted = false;
   
-  public DataProcessor(float[] inputData) 
+  public DetailsDataProcessor(float[] inputData) 
   {    
     this.inputData = inputData;
     this.inputStartIndex = 0;
@@ -28,15 +27,15 @@ public class DataProcessor implements Runnable
     this.run();
   }
   
-  public DataProcessor(float[] inputData, int inputStart, int inputEnd) 
+  public DetailsDataProcessor(float[] inputData, int inputStart, int inputEnd) 
   {    
     this.inputData = inputData;
     this.inputStartIndex = inputStart;
     this.inputEndIndex = inputEnd;
     float powOf10 = log(getInputSize())/log(10);
     println("Power: "+ powOf10);
-    skip_every_n = (this.inputEndIndex - this.inputStartIndex)/pow(10, (int)powOf10 - 2);
-    skip_reduction = skip_every_n/pow(10, (int)powOf10 - 3);
+    skip_every_n = (this.inputEndIndex - this.inputStartIndex)/pow(10, (int)powOf10);
+    skip_reduction = skip_every_n/pow(10, (int)powOf10 - 2);
     Thread thread = new Thread(this);    
     thread.start();
     this.run();
@@ -59,7 +58,7 @@ public class DataProcessor implements Runnable
   public void run(  ) 
   {    
     if(skip_every_n <= 1){
-        println("Processed all data.");
+        println("Processed all details.");
         processingCompleted = true;
         return;
     }
@@ -88,11 +87,16 @@ public class DataProcessor implements Runnable
         //println("Sample size: "+ sampleSize);
         println("Skipping every "+ skip_every_n + " samples.");
         //println("Done generating data");
-        skip_every_n -= skip_reduction; 
-        //skip_every_n /= 2; 
+        //skip_every_n -= skip_reduction; 
+        skip_every_n /= 2; 
     }
   }
   
+  
+  float getSampleData1(int index)
+  {
+     return inputData[this.inputStartIndex + index];
+  }
   
   float getSampleData(int index)
   {
@@ -116,17 +120,5 @@ public class DataProcessor implements Runnable
         //println("Asked for data");      
         return processedData;
     }
-  }
-}
-
-
-public class DataPoint
-{
-  float x,y=0.0f;
-  
-  DataPoint(float x, float y)
-  {
-    this.x = x;
-    this.y = y;
   }
 }

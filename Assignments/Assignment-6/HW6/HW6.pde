@@ -11,7 +11,7 @@ int maxI = 1000000;  // a big number. Keep modifying.
 float[] data = new float[maxI];
 float minD, maxD;
 DataProcessor dp;
-DataProcessor detailsProcessor;
+DetailsDataProcessor detailsProcessor;
 PFont f;
 boolean rectInProgress = false;
 
@@ -25,7 +25,7 @@ void setup() {
   for (int i=1; i<maxI; i++)
     data[i] = data[i-1] + random(-1.0, 1.0);
   dp = new DataProcessor(data);
-  detailsProcessor =  new DataProcessor(data);
+  detailsProcessor =  new DetailsDataProcessor(data);
   //minD = min(data);
   //maxD = max(data);
   
@@ -41,9 +41,12 @@ void draw() { //<>// //<>//
   textFont(f,8);                  // STEP 3 Specify font to be used
   // very simple timeseries visualization, VERY slow
   stroke(0); //<>//
+
   float[] retrievedData = getData(dp);
-  float[] detailedData = getData(detailsProcessor);
   renderOverview(retrievedData);
+
+  
+  float[] detailedData = getData(detailsProcessor);
   renderDetails(detailedData);
   //if (frameCount % 59 == 0) 
   {
@@ -55,14 +58,20 @@ void draw() { //<>// //<>//
   if(!rectInProgress)
       rect(selectedOriginX, selectedOriginY, selectedEndX, selectedEndY); 
   println("Details Processor has " + detailsProcessor.getInputSize() + " items.");
-  dp.run();
+  if(!dp.processingCompleted)
+  {
+      dp.run();
+  }
 }
 
 void processBigData()
 {
 
  //while(true)
- detailsProcessor.run();
+ if(!detailsProcessor.processingCompleted)
+  {
+      detailsProcessor.run();
+  }
 }
 
 void mousePressed() 
@@ -95,7 +104,7 @@ void mouseReleased()
   int endIndex = (int)(data.length * ((selectedEndX + selectedOriginX)/width));
   println("Have to render from " + startIndex + " to " + endIndex + "to process "+ (endIndex - startIndex) + " items.");
   //float[] newArray = Arrays.copyOfRange(data, startIndex, endIndex);
-  detailsProcessor =  new DataProcessor(data,startIndex, endIndex);
+  detailsProcessor =  new DetailsDataProcessor(data,startIndex, endIndex);
   detailsProcessor.run();
   rectInProgress = false;
 }
@@ -103,6 +112,8 @@ void mouseReleased()
 void renderDetails(float[] retrievedData)
 {
     //retrievedData = getData(detailsProcessor);
+    if(retrievedData == null)
+        return;
     println("Details has " + retrievedData.length + " items");
     
     fill(255,0,0);                         // STEP 4 Specify font color 
@@ -135,6 +146,14 @@ void renderPoints(float[] retrievedData, float originX, float originY, float w, 
 float[] getData(DataProcessor d)
 {
     //DataProcessor dp = new DataProcessor();
+    float[] retrievedData = d.getDataPoints();
+    return retrievedData;
+}
+
+
+
+float[] getData(DetailsDataProcessor d)
+{
     float[] retrievedData = d.getDataPoints();
     return retrievedData;
 }
