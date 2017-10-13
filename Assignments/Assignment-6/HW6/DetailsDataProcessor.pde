@@ -11,7 +11,8 @@ public class DetailsDataProcessor implements Runnable
   int sampleSize = 0;
   float[] processedData = null;//new float[sampleSize];
   float[] inputData;
-  int skip_every_n, skip_reduction;
+  int numberOfItemsToBeSkipped;
+  int numberOfItemsToIncreaseEachSkip = 0;
   int inputStartIndex, inputEndIndex;
   
   public DetailsDataProcessor(float[] inputData) 
@@ -19,8 +20,7 @@ public class DetailsDataProcessor implements Runnable
     this.inputData = inputData;
     this.inputStartIndex = 0;
     this.inputEndIndex = getInputSize();
-    skip_every_n = getInputSize()/10000;
-    skip_reduction = skip_every_n/50;
+    numberOfItemsToBeSkipped = getInputSize()/1000;
     Thread thread = new Thread(this);    
     thread.start();
     this.run();
@@ -33,12 +33,9 @@ public class DetailsDataProcessor implements Runnable
     this.inputEndIndex = inputEnd;
     int powOf10 = (int) (log(getInputSize())/log(10));
     println("Power: "+ powOf10);
-    skip_every_n = (this.inputEndIndex - this.inputStartIndex)/pow(10, (int)powOf10 - 5);
-    skip_reduction = 8*skip_every_n/(pow(10, powOf10-6));
-    if(skip_every_n <1){
-        
-        skip_reduction = 1;
-    }
+    int divider = 10^(powOf10 * (getInputSize()/100) );
+    numberOfItemsToBeSkipped = (this.inputEndIndex - this.inputStartIndex)/divider;
+    numberOfItemsToIncreaseEachSkip = numberOfItemsToBeSkipped / 10;
     Thread thread = new Thread(this);    
     thread.start();
     this.run();
@@ -60,27 +57,18 @@ public class DetailsDataProcessor implements Runnable
   
   public void run(  ) 
   {    
-    println("skip_every_n: "+ skip_every_n);
-    println("skip_reduction: "+ skip_reduction);
-    if(skip_reduction < 1)
-        skip_reduction = 1;
-    if(skip_every_n <= 1){
+    println("numberOfItemsToBeSkipped: "+ numberOfItemsToBeSkipped);
+    if(numberOfItemsToBeSkipped <= 1){
         
         println("Processed all details.");
         return;
     }
     
-    if(skip_every_n <= 2){
-        skip_every_n = 1;
+    if(numberOfItemsToBeSkipped <= 2){
+        numberOfItemsToBeSkipped = 1;
     }
-    
-    //Not that useful as it gets very granular for this.
-    if(skip_every_n <= skip_reduction)
-    {
-        skip_reduction /= 10;
-    }
-    
-    sampleSize = (this.inputEndIndex - this.inputStartIndex) / skip_every_n;
+
+    sampleSize = (this.inputEndIndex - this.inputStartIndex) / numberOfItemsToBeSkipped;
       
     //https://beginnersbook.com/2013/12/how-to-synchronize-arraylist-in-java-with-example/
     
@@ -92,14 +80,18 @@ public class DetailsDataProcessor implements Runnable
         processedData = new float[sampleSize];
         processedData[0] = 0.0;
         for (int i=1; i<sampleSize; i++)
-            processedData[i] =  getSampleData(i);//data[i * skip_every_n];
+            processedData[i] =  getSampleData(i);//data[i * numberOfItemsToBeSkipped];
         //println(processedData.length);
         //println(processedData[processedData.length/2]);
         //println("Sample size: "+ sampleSize);
-        println("Skipping every "+ skip_every_n + " samples.");
+        println("Skipping every "+ numberOfItemsToBeSkipped + " samples.");
         //println("Done generating data");
-        skip_every_n -= skip_reduction; 
-        //skip_every_n /= 10; 
+        numberOfItemsToBeSkipped -= numberOfItemsToIncreaseEachSkip; 
+        //numberOfItemsToBeSkipped /= 10; 
+        if(numberOfItemsToBeSkipped == numberOfItemsToIncreaseEachSkip)
+        {
+            numberOfItemsToIncreaseEachSkip = numberOfItemsToBeSkipped / 10;
+        }
     }
   }
   
@@ -107,10 +99,10 @@ public class DetailsDataProcessor implements Runnable
   float getSampleData1(int index)
   {
      float sum = 0.0;
-     for(int i = index * skip_every_n; i< (index + 1) * skip_every_n;i++)
+     for(int i = index * numberOfItemsToBeSkipped; i< (index + 1) * numberOfItemsToBeSkipped;i++)
          sum = inputData[this.inputStartIndex + i];
       
-      return sum/(skip_every_n);
+      return sum/(numberOfItemsToBeSkipped);
   }
   
   float getSampleData(int index)
