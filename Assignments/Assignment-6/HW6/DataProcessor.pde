@@ -58,12 +58,12 @@ public class DataProcessor implements Runnable
   public boolean isLocked()
   {
       return locked;
-  } //<>//
+  } //<>// //<>//
   
   public void run(  ) 
   {    
-    println("skip_every_n: "+ skip_every_n);
-    println("skip_reduction: "+ skip_reduction);
+    //println("skip_every_n: "+ skip_every_n);
+    //println("skip_reduction: "+ skip_reduction);
     if(skip_every_n <= 4){
         println("Processed all data.");
         return;

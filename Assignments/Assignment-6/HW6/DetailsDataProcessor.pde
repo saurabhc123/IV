@@ -33,7 +33,7 @@ public class DetailsDataProcessor implements Runnable
     this.inputEndIndex = inputEnd;
     int powOf10 = (int) (log(getInputSize())/log(10));
     println("Power: "+ powOf10);
-    int divider = 10^(powOf10 * (getInputSize()/100) );
+    int divider = 10000;
     numberOfItemsToBeSkipped = (this.inputEndIndex - this.inputStartIndex)/divider;
     numberOfItemsToIncreaseEachSkip = numberOfItemsToBeSkipped / 10;
     Thread thread = new Thread(this);    
@@ -69,6 +69,7 @@ public class DetailsDataProcessor implements Runnable
     }
 
     sampleSize = (this.inputEndIndex - this.inputStartIndex) / numberOfItemsToBeSkipped;
+
       
     //https://beginnersbook.com/2013/12/how-to-synchronize-arraylist-in-java-with-example/
     
@@ -86,17 +87,17 @@ public class DetailsDataProcessor implements Runnable
         //println("Sample size: "+ sampleSize);
         println("Skipping every "+ numberOfItemsToBeSkipped + " samples.");
         //println("Done generating data");
-        numberOfItemsToBeSkipped -= numberOfItemsToIncreaseEachSkip; 
+        //numberOfItemsToBeSkipped -= numberOfItemsToIncreaseEachSkip; 
         //numberOfItemsToBeSkipped /= 10; 
-        if(numberOfItemsToBeSkipped == numberOfItemsToIncreaseEachSkip)
+        if(numberOfItemsToBeSkipped <= numberOfItemsToIncreaseEachSkip)
         {
-            numberOfItemsToIncreaseEachSkip = numberOfItemsToBeSkipped / 10;
+            //numberOfItemsToIncreaseEachSkip = numberOfItemsToBeSkipped / 10;
         }
     }
   }
   
   
-  float getSampleData1(int index)
+  float getSampleData(int index)
   {
      float sum = 0.0;
      for(int i = index * numberOfItemsToBeSkipped; i< (index + 1) * numberOfItemsToBeSkipped;i++)
@@ -105,7 +106,7 @@ public class DetailsDataProcessor implements Runnable
       return sum/(numberOfItemsToBeSkipped);
   }
   
-  float getSampleData(int index)
+  float getSampleData1(int index)
   {
      return inputData[this.inputStartIndex + index];
   }

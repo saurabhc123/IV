@@ -4,7 +4,7 @@ import java.util.Arrays;
 // You are free to use or modify as much of this as you want.
 
 // data parameters:
-int maxI = 1000000;  // a big number. Keep modifying.
+int maxI = 100000000;  // a big number. Keep modifying.
 //int skip_every_n = 10000;
 //int skip_reduction = 200;
 
@@ -45,17 +45,18 @@ void draw() { //<>// //<>//
   float[] detailedData = getData(detailsProcessor);
   renderOverview(retrievedData);
   renderDetails(detailedData);
-  //if (frameCount % 59 == 0) 
+  //if (frameCount % 15 == 0) 
   {
     //thread("processBigData");
   }
-  processBigData();
+  
   stroke(0);
   fill(0,0,220,100);
   if(!rectInProgress)
       rect(selectedOriginX, selectedOriginY, selectedEndX, selectedEndY); 
   println("Details Processor has " + detailsProcessor.getInputSize() + " items.");
   dp.run();
+  processBigData();
 }
 
 void processBigData()
@@ -95,8 +96,8 @@ void mouseReleased()
   int endIndex = (int)(data.length * ((selectedEndX + selectedOriginX)/width));
   println("Have to render from " + startIndex + " to " + endIndex + "to process "+ (endIndex - startIndex) + " items.");
   //float[] newArray = Arrays.copyOfRange(data, startIndex, endIndex);
-  detailsProcessor =  new DetailsDataProcessor(data,startIndex, endIndex);
-  detailsProcessor.run(); //<>// //<>//
+  detailsProcessor =  new DetailsDataProcessor(data,startIndex, endIndex); //<>//
+  detailsProcessor.run(); //<>//
   rectInProgress = false;
 }
 
