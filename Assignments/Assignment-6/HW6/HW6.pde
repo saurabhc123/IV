@@ -4,7 +4,7 @@ import java.util.Arrays;
 // You are free to use or modify as much of this as you want.
 
 // data parameters:
-int maxI = 10000000;  // a big number. Keep modifying.
+int maxI = 1000000;  // a big number. Keep modifying.
 //int skip_every_n = 10000;
 //int skip_reduction = 200;
 
@@ -12,11 +12,14 @@ float[] data = new float[maxI];
 float minD, maxD;
 DataProcessor dp;
 DataProcessor detailsProcessor;
+PFont f;
+boolean rectInProgress = false;
 
 float selectedOriginX, selectedOriginY,selectedOriginXTemp, selectedOriginYTemp, selectedEndX, selectedEndY;
 
 void setup() {
   size(1000, 800);
+  f = createFont("Arial",16,true); // STEP 2 Create Font
   // simulate some timeseries data, y = f(t)
   data[0] = 0.0;
   for (int i=1; i<maxI; i++)
@@ -29,32 +32,56 @@ void setup() {
   //while(true)
   {
       float[] retrievedData = getData(dp);
-      println("Got " + retrievedData.length + " items"); //<>//
+      println("Got " + retrievedData.length + " items"); //<>// //<>//
   }
 }
  //<>//
-void draw() { //<>//
+void draw() { //<>// //<>//
   background(255);
+  textFont(f,8);                  // STEP 3 Specify font to be used
   // very simple timeseries visualization, VERY slow
   stroke(0); //<>//
   float[] retrievedData = getData(dp);
   float[] detailedData = getData(detailsProcessor);
   renderOverview(retrievedData);
   renderDetails(detailedData);
-  
+  //if (frameCount % 59 == 0) 
+  {
+    //thread("processBigData");
+  }
+  processBigData();
   stroke(0);
   fill(0,0,220,100);
-  rect(selectedOriginX, selectedOriginY, selectedEndX, selectedEndY); 
+  if(!rectInProgress)
+      rect(selectedOriginX, selectedOriginY, selectedEndX, selectedEndY); 
+  println("Details Processor has " + detailsProcessor.getInputSize() + " items.");
   dp.run();
-  detailsProcessor.run();
-  println("Details Processor has " + detailsProcessor.inputData.length + " items.");
+}
+
+void processBigData()
+{
+
+ //while(true)
+ detailsProcessor.run();
 }
 
 void mousePressed() 
 {
   //println("Mouse dragged from "+ pmouseX + "," + pmouseY + "to" + mouseX + "," + mouseY);
+  rectInProgress = true;
   selectedOriginXTemp = mouseX;
   selectedOriginYTemp = mouseY;
+}
+
+void mouseDragged()
+{
+    rectInProgress = true;
+    selectedEndX = mouseX;
+    selectedEndY = mouseY;
+    stroke(0);
+    fill(0,0,220,100);
+    rect(selectedOriginXTemp, selectedOriginYTemp, selectedEndX - selectedOriginXTemp, selectedEndY-selectedOriginYTemp);
+    //rectInProgress = false;
 }
 
 void mouseReleased() 
@@ -70,17 +97,25 @@ void mouseReleased()
   //float[] newArray = Arrays.copyOfRange(data, startIndex, endIndex);
   detailsProcessor =  new DataProcessor(data,startIndex, endIndex);
   detailsProcessor.run();
+  rectInProgress = false;
 }
 
 void renderDetails(float[] retrievedData)
 {
     //retrievedData = getData(detailsProcessor);
     println("Details has " + retrievedData.length + " items");
+    
+    fill(255,0,0);                         // STEP 4 Specify font color 
+    text("Processed points:" + retrievedData.length ,5.0, height/2 - 15);
+    text("Total points:" + detailsProcessor.getInputSize() ,5.0, height/2);
     renderPoints(retrievedData, 0.0,height/2 + 20, width, height);
 }
 
 void renderOverview(float[] retrievedData)
 {
+    fill(0,0,255);                         // STEP 4 Specify font color 
+    text("Processed points:" + retrievedData.length ,5.0, 20.0);
+    text("Total points:" + dp.getInputSize() ,5.0, 30.0);
     renderPoints(retrievedData, 0.0,0.0, width, height/2 - 20);
 }
 

@@ -2,6 +2,7 @@ import java.lang.Exception;
 import java.util.Collections;
 
 
+
 public class DataProcessor implements Runnable 
 {  
   
@@ -19,7 +20,7 @@ public class DataProcessor implements Runnable
     this.inputStartIndex = 0;
     this.inputEndIndex = this.inputData.length;
     skip_every_n = this.inputData.length/10000;
-    skip_reduction = skip_every_n/500;
+    skip_reduction = skip_every_n/50;
     Thread thread = new Thread(this);    
     thread.start();
     this.run();
@@ -30,12 +31,23 @@ public class DataProcessor implements Runnable
     this.inputData = inputData;
     this.inputStartIndex = inputStart;
     this.inputEndIndex = inputEnd;
-    skip_every_n = (this.inputEndIndex - this.inputStartIndex)/100000;
-    skip_reduction = skip_every_n/50;
+    float powOf10 = log(getInputSize())/log(10);
+    println("Power: "+ powOf10);
+    skip_every_n = (this.inputEndIndex - this.inputStartIndex)/pow(10, (int)powOf10 - 2);
+    skip_reduction = skip_every_n/pow(10, (int)powOf10 - 3);
     Thread thread = new Thread(this);    
     thread.start();
     this.run();
   }
+  
+  int pow (int a, int b)
+{
+    if ( b == 0)        return 1;
+    if ( b == 1)        return a;
+    if (b%2 == 0)    return     pow ( a * a, b/2); //even a=(a^2)^b/2
+    else                return a * pow ( a * a, b/2); //odd  a=a*(a^2)^b/2
+
+}
   
   public boolean isLocked()
   {
@@ -50,10 +62,10 @@ public class DataProcessor implements Runnable
     }
     
     //Not that useful as it gets very granular for this.
-    //if(skip_every_n <= skip_reduction)
-    //{
-        //skip_reduction /= 10;
-    //}
+    if(skip_every_n <= skip_reduction)
+    {
+        skip_reduction /= 10;
+    }
     
     sampleSize = (this.inputEndIndex - this.inputStartIndex) / skip_every_n;
       
@@ -86,6 +98,11 @@ public class DataProcessor implements Runnable
          sum = inputData[this.inputStartIndex + i];
       
       return sum/(skip_every_n);
+  }
+  
+  int getInputSize()
+  {
+    return (this.inputEndIndex - this.inputStartIndex);
   }
   
   public float[] getDataPoints()
