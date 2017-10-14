@@ -4,7 +4,7 @@ import java.util.Arrays;
 // You are free to use or modify as much of this as you want.
 
 // data parameters:
-int maxI = 100000000;  // a big number. Keep modifying.
+int maxI = 1000000000;  // a big number. Keep modifying.
 //int skip_every_n = 10000;
 //int skip_reduction = 200;
 
@@ -12,6 +12,7 @@ float[] data = new float[maxI];
 float minD, maxD;
 DataProcessor dp;
 DetailsDataProcessor detailsProcessor;
+int detailsStartIndex, detailsEndIndex = 0;
 PFont f;
 boolean rectInProgress = false;
 
@@ -34,15 +35,15 @@ void setup() {
     //while(true)
     {
         float[] retrievedData = getData(dp);
-        println("Got " + retrievedData.length + " items"); //<>// //<>//
+        println("Got " + retrievedData.length + " items"); //<>//
     }
 }
 //<>//
-void draw() { //<>// //<>//
+void draw() { //<>//
     background(255);
     textFont(f, 8);                  // STEP 3 Specify font to be used
     // very simple timeseries visualization, VERY slow
-    stroke(0); //<>//
+    stroke(0);
     float[] retrievedData = getData(dp);
     float[] detailedData = getData(detailsProcessor);
     renderOverview(retrievedData);
@@ -58,20 +59,40 @@ void draw() { //<>// //<>//
         rect(selectedOriginX, selectedOriginY, selectedEndX, selectedEndY); 
     //println("Details Processor has " + detailsProcessor.getInputSize() + " items.");
     dp.run();
-    processBigData();
-    float min = min(pointsToDraw);
-    float max = max(pointsToDraw);
-    if(max == 0.0 && min == 0.0)
+
+    //float min = min(detailedData);
+    //float max = max(detailedData);
+    //println("max->"+max +" min->"+min);
+    if(detailsStartIndex == 0 && detailsStartIndex == 0)
     {
         renderDetails(detailedData);
+        processBigData();
     }
-    for (int i=0; i<pointsToDraw.length; i++) 
+    else
     {
-        float value = pointsToDraw[i];
-        float x = map(i, 0, pointsToDraw.length, 0, width-1);
-        float y = map(value, min, max, height/2, height - 1);
-        point(x, y);
+        float[] newArray = Arrays.copyOfRange(data, detailsStartIndex, detailsEndIndex);
+        println(newArray[50]);
+        float min = min(newArray);
+        float max = max(newArray);
+        for (int i=0; i<newArray.length; i++) 
+        {
+            float value = newArray[i];
+            float x = map(i, 0, newArray.length, 0, width-1);
+            float y = map(value, max, min, height/2, height - 1);
+            point(x, y);
+        }
+        //detailsProcessor =  new DetailsDataProcessor(newArray); //<>//
+        //detailedData = detailsProcessor.getDataPoints();
+        //renderDetails(detailedData);
     }
+    //processBigData();
+    //for (int i=0; i<pointsToDraw.length; i++) 
+    //{
+    //    float value = pointsToDraw[i];
+    //    float x = map(i, 0, pointsToDraw.length, 0, width-1);
+    //    float y = map(value, min, max, height/2, height - 1);
+    //    point(x, y);
+    //}
 }
 
 void processBigData()
@@ -96,20 +117,24 @@ void mouseMoved()
         int proportionY = (int)map(mouseY, height/2, height, 0, data.length);
         println("proportionY: ", proportionY);
         int startIndex = proportionY - 5000;
-        int endIndex = proportionY + 5000; //<>//
+        int endIndex = proportionY + 5000;
         println("Have to render from " + startIndex + " to " + endIndex + " to process "+ (endIndex - startIndex) + " items.");
-        //detailsProcessor =  new DetailsDataProcessor(data,startIndex, endIndex);
-        //detailsProcessor.run(); //<>//
+        //float[] newArray = Arrays.copyOfRange(data, startIndex, endIndex);
+        //pointsToDraw = newArray;
+        detailsStartIndex = startIndex;
+        detailsEndIndex = endIndex;
+        //detailsProcessor =  new DetailsDataProcessor(newArray);
+        //detailsProcessor.run();
         //rectInProgress = false;
         //text("Start: " + startIndex + " End: " + endIndex + "Total: "+ (endIndex - startIndex) + " items." ,5.0, 500.0);
 
 
         //println("Got " + retrievedData.length + " items");
-        for (int i=startIndex; i<endIndex; i++) 
-        {
-            float value = data[i];
-            pointsToDraw[i - startIndex] = value;
-        }
+        //for (int i=startIndex; i<endIndex; i++) 
+        //{
+        //    float value = data[i];
+        //    pointsToDraw[i - startIndex] = value;
+        //}
     }
 }
 
@@ -134,9 +159,9 @@ void mouseReleased()
     int startIndex = (int)(data.length * (selectedOriginX/width));
     int endIndex = (int)(data.length * ((selectedEndX + selectedOriginX)/width));
     println("Have to render from " + startIndex + " to " + endIndex + "to process "+ (endIndex - startIndex) + " items.");
-    //float[] newArray = Arrays.copyOfRange(data, startIndex, endIndex);
-    detailsProcessor =  new DetailsDataProcessor(data, startIndex, endIndex);
-    detailsProcessor.run(); //<>//
+    float[] newArray = Arrays.copyOfRange(data, startIndex, endIndex);
+    detailsProcessor =  new DetailsDataProcessor(newArray);
+    detailsProcessor.run();
     rectInProgress = false;
 }
 
@@ -150,6 +175,8 @@ void renderDetails(float[] retrievedData)
     fill(255, 0, 0);                         // STEP 4 Specify font color 
     text("Processed points:" + retrievedData.length, 5.0, height/2 - 15);
     text("Total points:" + detailsProcessor.getInputSize(), 5.0, height/2);
+    text("Max:" + max(retrievedData), 5.0, height/2 + 15);
+    text("Min:" + min(retrievedData), 5.0, height/2 + 30);
     renderPoints(retrievedData, 0.0, height/2 + 20, width, height);
 }
 

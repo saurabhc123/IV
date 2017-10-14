@@ -58,7 +58,7 @@ public class DataProcessor implements Runnable
   public boolean isLocked()
   {
       return locked;
-  } //<>// //<>//
+  }
   
   public void run(  ) 
   {    
