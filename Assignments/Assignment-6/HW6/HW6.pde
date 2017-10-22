@@ -4,7 +4,7 @@ import java.util.Arrays;
 // You are free to use or modify as much of this as you want.
 
 // data parameters:
-int maxI = 1000000000;  // a big number. Keep modifying.
+int maxI = 10000000;  // a big number. Keep modifying.
 //int skip_every_n = 10000;
 //int skip_reduction = 200;
 
