@@ -4,7 +4,7 @@ import java.util.Arrays;
 // You are free to use or modify as much of this as you want.
 
 // data parameters:
-int maxI = 10000000;  // a big number. Keep modifying.
+int maxI = 100000000;  // a big number. Keep modifying.
 //int skip_every_n = 10000;
 //int skip_reduction = 200;
 
@@ -19,8 +19,9 @@ float selectedOriginX, selectedOriginY, selectedOriginXTemp, selectedOriginYTemp
 
 float[] pointsToDraw = new float[10000];
 int overviewSamplingRate;
-int detailsSamplingRate;
+int skipIndex;
 int pointsToRenderInDetails;
+float[] overViewData;
 
 void setup() {
     size(1000, 800);
@@ -31,12 +32,14 @@ void setup() {
         data[i] = data[i-1] + random(-1.0, 1.0);
         
     overviewSamplingRate = data.length / (width / 3);
-    detailsSamplingRate = data.length / width;
-    pointsToRenderInDetails = width;
+    skipIndex = data.length / width;
+    pointsToRenderInDetails = width; //<>//
+    overViewData = GetOverviewData();
+    
      //<>// //<>// //<>//
 }
 //<>//
-void draw() { //<>// //<>// //<>//
+void draw() { //<>// //<>//
     background(255);
     textFont(f, 8);                  // STEP 3 Specify font to be used
     // very simple timeseries visualization, VERY slow
@@ -44,19 +47,19 @@ void draw() { //<>// //<>// //<>//
 
 
     renderOverview();
-    renderDetails();
+    renderDetails(); //<>//
     fill(0, 0, 220, 100);
     rect(selectedOriginX, selectedOriginY, selectedEndX + 50, selectedEndY);
-     //<>// //<>// //<>//
+     //<>// //<>//
 }
 
 void renderOverview()
 {
-    float[] retrievedData = GetOverviewData();
+    //float[] retrievedData = GetOverviewData();
     fill(0, 0, 255);                         // STEP 4 Specify font color 
     //text("Processed points:" + retrievedData.length, 5.0, 20.0);
     //text("Total points:" + dp.getInputSize(), 5.0, 30.0);
-    renderPoints(retrievedData, 0.0, 0.0, width, height/2 - 20);
+    renderPoints(overViewData, 0.0, 0.0, width, height/2 - 20);
 }
 
 void renderDetails()
@@ -70,18 +73,23 @@ void renderDetails()
 
 float[] GetDetailsData()
 {
-    
     println("Have to render details from " + detailsStartIndex + " to " + detailsEndIndex + " to process "+ (detailsEndIndex - detailsStartIndex) + " items.");
-    detailsSamplingRate = (detailsEndIndex - detailsStartIndex) / pointsToRenderInDetails;
-    pointsToRenderInDetails = width;//(detailsEndIndex - detailsStartIndex) / detailsSamplingRate;
+    if(skipIndex < 1)
+        skipIndex = 1;
+    pointsToRenderInDetails = (detailsEndIndex - detailsStartIndex) / skipIndex;
     float[] overviewData = new float[pointsToRenderInDetails];
     for(int i = 0; i< pointsToRenderInDetails ;i++)
     {
-        overviewData[i] = data[detailsStartIndex + i*detailsSamplingRate];
+        overviewData[i] = data[detailsStartIndex + i*skipIndex];
     }
-    print(overviewData[60]);
-    if(!(detailsSamplingRate / 20 < 2))
-        detailsSamplingRate /= 20;
+    //print(overviewData[60]);
+    if(skipIndex / 10 > 100)
+        skipIndex /= 10;
+    else
+    {
+        if(skipIndex >=2)
+            skipIndex -= 1;
+    }
     return overviewData;
 }
 void mouseMoved()
@@ -89,8 +97,8 @@ void mouseMoved()
     if (mouseX > 0.0 && mouseX < width && mouseY > height/2 && mouseY < height)
     {
         int proportionX = (int)map(mouseX, 0, width, 0, data.length);
-        int proportionY = (int)map(mouseY, height - 20, height/2, 0, data.length / height);
-        detailsSamplingRate = (detailsEndIndex - detailsStartIndex) / width;
+        int proportionY = (int)map(mouseY, height - 20, height/2 - 20, 0, data.length / height);
+        skipIndex = (detailsEndIndex - detailsStartIndex) / width;
         pointsToRenderInDetails = width;
         int nPointsToShow = detailsEndIndex - detailsStartIndex;
         //if (proportionX < 0)
@@ -105,7 +113,8 @@ void mouseMoved()
         detailsEndIndex = endIndex;
         selectedOriginX = map(proportionX, 0, data.length, 0, width);
         selectedOriginY = 0;
-        selectedEndX = map(width * (proportionY), 0, data.length, 0, width);
+        //selectedEndX = map(width * (proportionY), startIndex, endIndex, 0, width);
+        selectedEndX = map((detailsEndIndex - detailsStartIndex), 0, data.length, 0, width);
         selectedEndY = height/2;
     }
 
@@ -114,15 +123,26 @@ void mouseMoved()
 
 float[] GetOverviewData()
 {
-    int overviewSamplingRate = data.length / (width/3);
-    float[] overviewData = new float[width*3];
-    for(int i =0; i< width*3;i++)
+    int proportion = 10;
+    int overviewSamplingRate = data.length / (width/proportion);
+    float[] overviewData = new float[width*proportion];
+    for(int i =0; i< width*proportion;i++)
     {
-        overviewData[i] = data[i + overviewSamplingRate];
+        overviewData[i] =  getSampleData(i + overviewSamplingRate);//data[i + overviewSamplingRate];
+        //overviewData[i] =  data[i + overviewSamplingRate];
     }
     
     return overviewData;
 }
+
+float getSampleData(int index)
+  {
+     float sum = 0.0;
+     for(int i = 0; i< overviewSamplingRate;i++)
+         sum = data[i + index];
+      
+      return sum/(overviewSamplingRate);
+  }
 
 void renderPoints(float[] retrievedData, float originX, float originY, float w, float h)
 {
