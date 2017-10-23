@@ -96,8 +96,9 @@ void mouseMoved()
 {
     if (mouseX > 0.0 && mouseX < width && mouseY > height/2 && mouseY < height)
     {
+        int diff = (detailsEndIndex - detailsStartIndex);
         int proportionX = (int)map(mouseX, 0, width, 0, data.length);
-        int proportionY = (int)map(mouseY, height - 20, height/2 - 20, 0, data.length / height);
+        int proportionY = (int)map(mouseY, height - 20, height/2 - 20, 0, diff);
         skipIndex = (detailsEndIndex - detailsStartIndex) / width;
         pointsToRenderInDetails = width;
         int nPointsToShow = detailsEndIndex - detailsStartIndex;
@@ -105,16 +106,18 @@ void mouseMoved()
         //    proportionX = 0;
         //if (proportionX > data.length - nPointsToShow)
         //    proportionX = data.length - nPointsToShow;
-        int startIndex = (int)map(mouseX, 0, width, 0, data.length);;
+        int startIndex = (int)map(mouseX, 0, width, detailsStartIndex - proportionX > 0? (detailsStartIndex - proportionX) : 0, diff);;
         int endIndex = proportionX + proportionY;
 
         println("Have to render from " + startIndex + " to " + endIndex + " to process "+ (endIndex - startIndex) + " items.");
         detailsStartIndex = startIndex;
         detailsEndIndex = endIndex;
-        selectedOriginX = map(proportionX, 0, data.length, 0, width);
+        //selectedOriginX = map(detailsStartIndex, 0, data.length, 0, width);
+        selectedOriginX = map(detailsStartIndex, 0, data.length, 0, width);
         selectedOriginY = 0;
         //selectedEndX = map(width * (proportionY), startIndex, endIndex, 0, width);
-        selectedEndX = map((detailsEndIndex - detailsStartIndex), 0, data.length, 0, width);
+        //selectedEndX = map(detailsEndIndex, 0, data.length, 0, width);
+        selectedEndX = map(diff + detailsStartIndex, 0, data.length, 0, width);
         selectedEndY = height/2;
     }
 
