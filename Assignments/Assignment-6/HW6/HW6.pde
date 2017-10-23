@@ -33,10 +33,10 @@ void setup() {
     overviewSamplingRate = data.length / (width / 3);
     detailsSamplingRate = data.length / width;
     pointsToRenderInDetails = width;
-     //<>// //<>//
+     //<>// //<>// //<>//
 }
 //<>//
-void draw() { //<>// //<>//
+void draw() { //<>// //<>// //<>//
     background(255);
     textFont(f, 8);                  // STEP 3 Specify font to be used
     // very simple timeseries visualization, VERY slow
@@ -47,7 +47,7 @@ void draw() { //<>// //<>//
     renderDetails();
     fill(0, 0, 220, 100);
     rect(selectedOriginX, selectedOriginY, selectedEndX + 50, selectedEndY);
-     //<>// //<>//
+     //<>// //<>// //<>//
 }
 
 void renderOverview()
@@ -80,8 +80,8 @@ float[] GetDetailsData()
         overviewData[i] = data[detailsStartIndex + i*detailsSamplingRate];
     }
     print(overviewData[60]);
-    //if(!(detailsSamplingRate / detailsSamplingRate/20 < 2))
-        //detailsSamplingRate /= detailsSamplingRate/20;
+    if(!(detailsSamplingRate / 20 < 2))
+        detailsSamplingRate /= 20;
     return overviewData;
 }
 void mouseMoved()
@@ -114,9 +114,9 @@ void mouseMoved()
 
 float[] GetOverviewData()
 {
-    int overviewSamplingRate = data.length / width;
-    float[] overviewData = new float[width];
-    for(int i =0; i< width;i++)
+    int overviewSamplingRate = data.length / (width/3);
+    float[] overviewData = new float[width*3];
+    for(int i =0; i< width*3;i++)
     {
         overviewData[i] = data[i + overviewSamplingRate];
     }
