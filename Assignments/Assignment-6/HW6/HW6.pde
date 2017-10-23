@@ -4,7 +4,7 @@ import java.util.Arrays;
 // You are free to use or modify as much of this as you want.
 
 // data parameters:
-int maxI = 10000000;  // a big number. Keep modifying.
+int maxI = 100000000;  // a big number. Keep modifying.
 //int skip_every_n = 10000;
 //int skip_reduction = 200;
 
@@ -29,7 +29,7 @@ void setup() {
     for (int i=1; i<maxI; i++)
         data[i] = data[i-1] + random(-1.0, 1.0);
         
-    overviewSamplingRate = data.length / width;
+    overviewSamplingRate = data.length / (width / 3);
     detailsSamplingRate = data.length / width;
      //<>//
 }
@@ -40,9 +40,11 @@ void draw() { //<>//
     // very simple timeseries visualization, VERY slow
     stroke(5);
 
+
     renderOverview();
     renderDetails();
-    
+    fill(0, 0, 220, 100);
+    rect(selectedOriginX, selectedOriginY, selectedEndX + 50, selectedEndY);
      //<>//
 }
 
@@ -131,6 +133,10 @@ void mouseMoved()
         println("Have to render from " + startIndex + " to " + endIndex + " to process "+ (endIndex - startIndex) + " items.");
         detailsStartIndex = startIndex;
         detailsEndIndex = endIndex;
+        selectedOriginX = map(proportionX, 0, data.length, 0, width);
+        selectedOriginY = 0;
+        selectedEndX = map(width * (nPointsToShow / data.length), 0, data.length, 0, width);
+        selectedEndY = height/2;
     }
 
 }
