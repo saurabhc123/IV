@@ -4,7 +4,7 @@ import java.util.Arrays;
 // You are free to use or modify as much of this as you want.
 
 // data parameters:
-int maxI = 100000000;  // a big number. Keep modifying.
+int maxI = 1000000000;  // a big number. Keep modifying.
 //int skip_every_n = 10000;
 //int skip_reduction = 200;
 
@@ -68,6 +68,10 @@ void renderDetails()
     fill(0, 0, 255);                         // STEP 4 Specify font color 
     //text("Processed points:" + retrievedData.length, 5.0, 20.0);
     //text("Total points:" + dp.getInputSize(), 5.0, 30.0);
+    float baseHeight = height/2 + 20;
+    text("Start Index:" + detailsStartIndex ,5.0, baseHeight);
+    text("End Index:" + detailsEndIndex ,5.0, baseHeight + 20);
+    text("Total Points:" + (detailsEndIndex - detailsStartIndex) ,5.0, baseHeight + 40);
     renderPoints(retrievedData, 0.0, height/2 + 20, width, height - 20);
 }
 
@@ -94,10 +98,10 @@ float[] GetDetailsData()
 }
 void mouseMoved()
 {
-    if (mouseX > 0.0 && mouseX < width && mouseY > height/2 && mouseY < height)
+    if (mouseX > 5.0 && mouseX < width - 10 && mouseY > height/2 + 10 && mouseY < height - 20)
     {
         int proportionX = (int)map(mouseX, 0, width, 0, data.length);
-        int proportionY = (int)map(mouseY, height - 20, height/2 - 20, 0, data.length / height);
+        int proportionY = (int)map(mouseY, height - 20, height/2 - 20, 0, proportionX / height);
         skipIndex = (detailsEndIndex - detailsStartIndex) / width;
         pointsToRenderInDetails = width;
         int nPointsToShow = detailsEndIndex - detailsStartIndex;
@@ -155,40 +159,4 @@ void renderPoints(float[] retrievedData, float originX, float originY, float w, 
         float y = map(retrievedData[i], min, max, h-1, originY);
         point(x, y);
     }
-}
-
-
-void mousePressed() 
-{
-    //println("Mouse dragged from "+ pmouseX + "," + pmouseY + "to" + mouseX + "," + mouseY);
-    rectInProgress = true;
-    selectedOriginXTemp = mouseX;
-    selectedOriginYTemp = mouseY;
-}
-
-
-
-void mouseDragged()
-{
-    rectInProgress = true;
-    selectedEndX = mouseX;
-    selectedEndY = mouseY;
-    stroke(0);
-    fill(0, 0, 220, 100);
-    rect(selectedOriginXTemp, selectedOriginYTemp, selectedEndX - selectedOriginXTemp, selectedEndY-selectedOriginYTemp);
-    //rectInProgress = false;
-}
-
-void mouseReleased() 
-{
-    //println("Mouse dragged from "+ pmouseX + "," + pmouseY + "to" + mouseX + "," + mouseY);
-    selectedOriginX = selectedOriginXTemp < mouseX ? selectedOriginXTemp:mouseX;
-    selectedOriginY = 0;
-    selectedEndX = selectedOriginXTemp < mouseX ? mouseX - selectedOriginX : selectedOriginXTemp - mouseX;
-    selectedEndY = height/2 - 20;
-    int startIndex = (int)(data.length * (selectedOriginX/width));
-    int endIndex = (int)(data.length * ((selectedEndX + selectedOriginX)/width));
-    println("Have to render from " + startIndex + " to " + endIndex + "to process "+ (endIndex - startIndex) + " items.");
-    float[] newArray = Arrays.copyOfRange(data, startIndex, endIndex);
-    rectInProgress = false;
 }
